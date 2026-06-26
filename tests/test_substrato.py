@@ -125,6 +125,21 @@ class Substrato(unittest.TestCase):
         self.assertIn(a, ids)
         cx.close()
 
+    # ---- materializador: aterriza una solicitud sancionada en una via coherente ----
+    def test_materializador_via_coherente(self):
+        from materializa import Materializador
+        mat = Materializador(self.store)
+        ins = Inscripcion("premisa", ["q"], [{"x": 1}], "conclusion", self._inferidor())
+        r = mat.materializar(pregunta="pp", gatillo="explicito:'g'", formulacion="ff",
+                             url="https://x.com/a", snapshot_bytes=b"data",
+                             inscripcion=ins, txt="claim")
+        cx = proyeccion.reconstruir(self.store, self.db)
+        asc = proyeccion.traza_ascendente(cx, r["afirmacion"])
+        self.assertEqual(asc["necesidad"]["pregunta"], "pp")
+        self.assertEqual(len(proyeccion.huerfanos(cx)), 0)
+        self.assertTrue(self.store.has_snapshot(r["snapshot"]))
+        cx.close()
+
     # ---- D-ver-1: normalizacion conservadora ----
     def test_normaliza_url(self):
         a = canonical("http://site.com/path/?utm_source=x&b=2&a=1#frag")
