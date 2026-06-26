@@ -1,0 +1,13 @@
+# Proyeccion regenerable (forma Q): se reconstruye del log durable, no se versiona.
+*.db
+*.db-journal
+*.db-wal
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# El durable NO vive aqui (vive en ../AEC, fuera de todo repo).
+# Si alguien lo enlaza por error, que git no lo vea:
+AEC/
