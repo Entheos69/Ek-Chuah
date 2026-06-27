@@ -11,3 +11,6 @@ __pycache__/
 # El durable NO vive aqui (vive en ../AEC, fuera de todo repo).
 # Si alguien lo enlaza por error, que git no lo vea:
 AEC/
+
+# granos/ (los YAML-AEC, un grano por necesidad) SI se versionan: son la fuente
+# de la consolidacion (analogo a sessions/ de concept-sediment). No se ignoran.

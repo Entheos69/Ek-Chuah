@@ -20,7 +20,8 @@ Greenfield. Solo stdlib. El **durable** vive FUERA de este repo, en `../AEC/`
 | `aec_store.py` | El materializador: UNICO escritor append-only del durable (WORM). |
 | `via_epistemica.py` | Emision de eventos: necesidad -> consulta -> referencia(version) -> afirmacion. |
 | `proyeccion.py` | Reconstruye la `.db` del log + consultas (traza, huerfanos, I2, version_actual). |
-| `materializa.py` | Paso 2 (materializacion): aterriza una solicitud sancionada (snapshot a WORM + via). |
+| `materializa.py` | Materializador programatico (snapshot a WORM + via en un paso; PoC/demo). |
+| `materializa_orden.py` | Paso 2 (materializacion del flujo orden): baja cada URL de una orden YAML-AEC a WORM y rellena `content_hash`+`capture_ts`. Aqui vive la red. |
 | `ingesta.py` | Paso 3 (ingesta): YAML-AEC -> lint C1-C7 -> verifica hash en WORM (C3) -> puebla `graph_aec`. Idempotente, CERO red. |
 
 ## Dependencias
@@ -45,10 +46,25 @@ artefacto YAML-AEC (consistente con el gemelo `concept-sediment`; colapso Guardi
 
     python -m unittest discover -s tests -p "test_*.py"
 
-## Ingerir un grano (paso 3)
+## Granos (los YAML-AEC)
 
-    python ingesta.py <grano.yaml> --aec ../AEC --db ek_chuah.db   # puebla el durable real (sancion Guardian)
-    python ingesta.py <grano.yaml> --aec ../AEC --lint-only        # solo lintea, no escribe
+Un grano = un YAML-AEC = una `necesidad` con su arbol (D-schema-2). Viven en
+**`granos/<session_id>.yaml`** (tracked; el analogo a `sessions/` de concept-sediment, sin
+reusar el nombre). El durable WORM (`../AEC`) y la proyeccion (`*.db`) NO son granos.
+
+## Consolidar un grano (orden del Estratega -> graph_aec)
+
+El grano llega como ORDEN con `content_hash`/`capture_ts` = `MATERIALIZAR`. Dos pasos,
+**in-place** (el mismo archivo evoluciona orden -> materializado -> ingerido):
+
+    # paso 2: baja la roca de cada URL a WORM y rellena los placeholders (RED; sancion del actor local)
+    python materializa_orden.py granos/2026-06-27-001-Indagacion.yaml --aec ../AEC --consolidado-por "Guardian"
+
+    # paso 3: lint C1-C7 + verifica hash en WORM -> puebla graph_aec (CERO red, idempotente)
+    python ingesta.py granos/2026-06-27-001-Indagacion.yaml --aec ../AEC --db ek_chuah.db
+
+    # solo validar sin escribir nada (falla en C3/C5 hasta materializar):
+    python ingesta.py granos/2026-06-27-001-Indagacion.yaml --aec ../AEC --lint-only
 
 ## Diseno
 

@@ -1,0 +1,88 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-06-27-001-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'Antes de colapsar el trinomio A/B/C sobre donde vive el lector del grafo,
+      el Guardian ordena investigar soluciones a problemas similares. Necesidad no-endemica:
+      requiere la web. El hueco que la disparo: "local vs nube" parecia binario, pero
+      ni la nube es perdida si se reconstruye, ni lo local es seguro ante dano fisico
+      al equipo.
+
+      '
+    busqueda:
+    - event sourcing rebuild read model projection from event log
+    - local-first software principles sync survive server and device failure
+    resultados_crudos:
+    - fuente: event-driven.io (Projections and Read Models)
+      texto: events are our source of truth ... read models as secondary data
+    - fuente: dev.to (Event Sourcing Pattern Details)
+      texto: Your event store is your ultimate backup.
+    - fuente: letsbuildsolutions.com (Event Sourcing in Practice)
+      texto: The event log is the source of truth. Current state is a projection.
+    - fuente: inkandswitch (Local-first software, manifiesto)
+      texto: If a service shuts down, the software stops functioning
+    - fuente: inkandswitch / notas Local-first software
+      texto: Syncing across devices via a server can act as an offsite backup.
+    conclusion: 'No es "donde vive el lector" sino que el log replicado es la verdad
+      y la proyeccion (incluido el MCP) es desechable y reconstruible. Event sourcing
+      y local-first disuelven en una sola disciplina la muerte-de-equipo, la caida-de-nube
+      y el drift durable-vs-durable: un solo log replicado, la proyeccion siempre
+      reconstruida de el, nunca editada en sitio. El MCP en linea es proyeccion del
+      log local replicado; CRDT es innecesario por ser single-writer.
+
+      '
+    inferidor:
+      model: estratega/claude-opus-4
+      ts: '2026-06-26T14:03:11'
+  necesidad:
+    pregunta: Donde debe vivir el lector del grafo, dado que ni local ni nube son
+      seguros por si solos
+    gatillo: explicito:'antes de colapsar investiga en la web las posibles soluciones
+      a problemas similares'
+    origen_nodo: decision:A/B/C-donde-vive-el-lector
+  consultas:
+  - formulacion: event sourcing rebuild read model projection from event log
+    referencias:
+    - local_id: r1
+      url: https://event-driven.io/en/projections_and_read_models_in_event_driven_architecture/
+      content_hash: 5faa61660288f562d0b8d66a7275a8b171beb2af409d88eb20eb1dde7818d59f
+      capture_ts: '2026-06-27T15:01:30'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r2
+      url: https://dev.to/godofgeeks/event-sourcing-pattern-details-1jf8
+      content_hash: 376fe7f472d978bb8ec685821df0b471929b2b6ab8d695d1e51c496d0eb6ad1a
+      capture_ts: '2026-06-27T15:01:32'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: local-first software principles sync survive server and device failure
+    referencias:
+    - local_id: r3
+      url: https://www.inkandswitch.com/local-first-software/
+      content_hash: 54099e1381e506f8a9178589b3a42f6a1276b3f888b4af7d5544f1cbb4f4ae8e
+      capture_ts: '2026-06-27T15:01:32'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: 'El log replicado es la verdad; la proyeccion (incluido el MCP) es desechable
+      y reconstruible. Por eso la proyeccion nunca se edita en sitio: se reconstruye
+      del log.
+
+      '
+    tipo: decision
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: 'Replicar el log a >=2 sitios (1 off-site) hace que ni la caida de la nube
+      ni el dano fisico al equipo sean perdida total. Lo local es el seguro contra
+      la nube; la replica, contra lo local.
+
+      '
+    tipo: decision
+    estatus: afirmado
+    survived_from: r3
+    inferida_por: i1
