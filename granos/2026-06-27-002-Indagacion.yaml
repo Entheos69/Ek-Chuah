@@ -1,0 +1,110 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-06-27-002-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'El Bibliotecario tiene un corpus heterogeneo (MD, HTML, HTML-DC, DOCX,
+      PDF) cuyos conceptos hay que extraer y dejar disponibles para una busqueda tipo
+      grafo. Necesidad no-endemica: investigar tecnologias y desarrollos vigentes
+      que lo permitan, sin asumir un stack pesado (Neo4j) antes de ver alternativas
+      que reusen lo que ya hay (Postgres + pgvector).
+
+      '
+    busqueda:
+    - GraphRAG knowledge graph extraction from documents 2026
+    - LightRAG vs nano-graphrag PostgreSQL pgvector storage backend
+    - Docling vs Unstructured document parsing PDF DOCX HTML to markdown 2026
+    resultados_crudos:
+    - fuente: LightRAG (lightrag-hku, PyPI/GitHub)
+      texto: a one-stop solution ... as KV store, VectorDB (pgvector) and GraphDB
+        (apache AGE)
+    - fuente: LightRAG (HKUDS, GitHub)
+      texto: The Embedding model must be determined before document indexing
+    - fuente: jimysancho/graphrag-psql (GitHub)
+      texto: The graph tool is still networkx
+    - fuente: Latent Space - LightRAG variants (jaesolshin.com)
+      texto: ApeRAG does not use Apache AGE ... plain PostgreSQL relational tables
+    - fuente: Docling (IBM Research, GitHub)
+      texto: Parsing of multiple document formats including PDF, DOCX, PPTX, XLSX,
+        HTML
+    - fuente: Docling paper (via heidloff.net)
+      texto: a cost-effective, accurate and transparent open-source library with a
+        permissive MIT license
+    conclusion: 'El campo se polarizo en dos filosofias: GraphRAG (extraccion con
+      LLM + deteccion de comunidades, potente pero cara de construir y afinar) y LightRAG/nano-graphrag
+      (extraccion ligera de entidades+relaciones, el punto dulce para un operador
+      solo). Hallazgo clave para el stack: LightRAG corre enteramente sobre Postgres
+      como solucion unica (KV + pgvector + Apache AGE), sin necesidad de Neo4j; y
+      existen variantes que ni siquiera usan AGE, modelando el grafo como tablas relacionales.
+      Para el corpus heterogeneo, Docling parsea PDF/DOCX/HTML a markdown/JSON preservando
+      estructura (offline-capable). Insight propio del stack: los HTML-DC ya traen
+      capa JSON machine-readable, asi que su parseo es casi gratis. Decomposicion
+      en tres capas: parseo / extraccion / almacen. Esto fundo la decision B-local.
+
+      '
+    inferidor:
+      model: estratega/claude-opus-4
+      ts: '2026-06-19T10:30:00'
+  necesidad:
+    pregunta: Como extraer conceptos de un corpus heterogeneo del Bibliotecario y
+      dejarlos disponibles para busqueda tipo grafo
+    gatillo: explicito:'necesito una forma ordenada de extraer algunos de sus conceptos
+      y dejarlos disponibles para una busqueda tipo grafo; investiga tecnologias y
+      desarrollos que lo permitan'
+    origen_nodo: decision:B-local-arquitectura
+  consultas:
+  - formulacion: LightRAG vs nano-graphrag PostgreSQL pgvector storage backend
+    referencias:
+    - local_id: r1
+      url: https://github.com/HKUDS/LightRAG
+      content_hash: 8ab631b1edb3cbfae63cb9d3eef0057b56a22251bb0dd49aa945d76975f5182a
+      capture_ts: '2026-06-27T19:08:35'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r2
+      url: https://github.com/jimysancho/graphrag-psql
+      content_hash: 176c79602dad9e2062b0f824d96375bf3b032482d966b33d29c3fe3e55ecd58a
+      capture_ts: '2026-06-27T19:08:36'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: Docling vs Unstructured document parsing PDF DOCX HTML to markdown
+      2026
+    referencias:
+    - local_id: r3
+      url: https://github.com/docling-project/docling
+      content_hash: bdca52de0ed54b2b4ec6db9c03779b3a98f89e42fa440b29f65c60460d8bf2ae
+      capture_ts: '2026-06-27T19:08:37'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: 'LightRAG corre enteramente sobre PostgreSQL como solucion unica (KV + pgvector
+      + Apache AGE); no requiere Neo4j para el grafo. Reusa el stack existente en
+      vez de anadir una pieza pesada.
+
+      '
+    tipo: decision
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: 'Para el corpus heterogeneo, Docling parsea PDF/DOCX/PPTX/HTML a markdown/JSON
+      preservando estructura, con ejecucion local (air-gapped). Es la capa de parseo
+      offline-capable del pipeline.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r3
+    inferida_por: i1
+  - txt: 'El grafo puede modelarse como tablas relacionales en Postgres (networkx
+      / ApeRAG) SIN Apache AGE; el modelo de aristas relacionales basta a esta escala.
+      Semilla de lo que despues fueron el Catastro y Ek-Chuah: aristas relacionales,
+      sin grafo nativo.
+
+      '
+    tipo: decision
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i1

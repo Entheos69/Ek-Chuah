@@ -23,11 +23,14 @@ Greenfield. Solo stdlib. El **durable** vive FUERA de este repo, en `../AEC/`
 | `materializa.py` | Materializador programatico (snapshot a WORM + via en un paso; PoC/demo). |
 | `materializa_orden.py` | Paso 2 (materializacion del flujo orden): baja cada URL de una orden YAML-AEC a WORM y rellena `content_hash`+`capture_ts`. Aqui vive la red. |
 | `ingesta.py` | Paso 3 (ingesta): YAML-AEC -> lint C1-C7 -> verifica hash en WORM (C3) -> puebla `graph_aec`. Idempotente, CERO red. |
+| `exporta_log.py` | Borde local -> nube (camino B): empuja `log/inscripciones.jsonl` a la tabla `aec_log` del Postgres MCP-AEC. Idempotente por `line_sha` (ON CONFLICT DO NOTHING). Membrana: SOLO el log, nunca snapshots. |
 
 ## Dependencias
 
 Substrato (pasos 1-2): **solo stdlib**. `ingesta.py` (paso 3) usa **PyYAML** para parsear el
 artefacto YAML-AEC (consistente con el gemelo `concept-sediment`; colapso Guardian 2026-06-27).
+`exporta_log.py` (cruce real) usa **psycopg** (o `psycopg2`) para escribir a `aec_log` --
+importado PEREZOSO: los tests y `--dry-run` corren sin red ni driver.
 
 ## Invariantes probadas (`tests/test_substrato.py` + `tests/test_ingesta.py`)
 
@@ -66,14 +69,29 @@ El grano llega como ORDEN con `content_hash`/`capture_ts` = `MATERIALIZAR`. Dos 
     # solo validar sin escribir nada (falla en C3/C5 hasta materializar):
     python ingesta.py granos/2026-06-27-001-Indagacion.yaml --aec ../AEC --lint-only
 
+## Exportar a la nube (camino B)
+
+El MCP-AEC en la nube reconstruye `graph_aec` del **log replicado** (tabla `aec_log`),
+no de la proyeccion empujada. `exporta_log.py` es el unico cruce nube <- local: empuja
+las lineas de `log/inscripciones.jsonl` con `line_sha` identico al de `aec_store`
+(idempotente; re-exportar = no-op). Membrana: SOLO el log, nunca `snapshots/`.
+
+    # validar local sin la nube (lee y hashea, no escribe; sin red ni driver):
+    python exporta_log.py --aec ../AEC --dry-run
+
+    # cruce real (el Guardian provee el DATABASE_URL del store MCP-AEC):
+    python exporta_log.py --aec ../AEC --db-url "$DATABASE_URL"
+
 ## Diseno
 
 `concept-sediment/docs/ek_chuah/DISENO_EK_CHUAH_C0_AEC_2026-06-26.md`
 
 ## Frontera
 
-- Pasos 1-3 (substrato + materializacion + ingesta) en verde. Falta: MCP-AEC lector C3
-  (nivel 2, jurisdiccion CodeMCP, paso 4 -- se desbloquea cuando `graph_aec` tiene >=1 grano
-  real ingerido), descarga de red real en el paso 2, inferidor real, replicacion 3-2-1 del log.
+- Pasos 1-4 en verde (substrato + materializacion + ingesta + lector C3 MCP-AEC desplegado).
+  `exporta_log.py` (borde camino B) construido y probado offline (paridad `line_sha`,
+  idempotencia, incremental, membrana). Falta el **cruce real**: el Guardian aprovisiona el
+  `DATABASE_URL` del store MCP-AEC (rol con escritura a `aec_log`) y corre el exportador tras
+  cada ingesta. Tambien: descarga de red real en el paso 2, inferidor real, replicacion 3-2-1.
 - Bifurcaciones abiertas: D-ver-2 (deteccion proactiva vs perezosa), D-ver-3 (vista por
   defecto), async-aporte (como una IA emite necesidad al Estratega).
