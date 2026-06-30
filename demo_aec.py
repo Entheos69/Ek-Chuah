@@ -1,7 +1,7 @@
 """
 demo_aec.py -- El substrato Q aplicado end-to-end (sobre AEC TEMPORAL, no el durable real).
 
-D2: NO escribe en el AEC real (Scripts/AEC). Usa un directorio temporal -- inscribir en el
+D2: NO escribe en el AEC real (el durable ../AEC). Usa un directorio temporal -- inscribir en el
 durable real exige sancion del Estratega, no la iniciativa de una demo.
 
 Inscribe un intercambio (la investigacion event-sourcing/local-first que dio origen a todo
@@ -83,7 +83,7 @@ def main():
         cx2.close()
         print(f"FALSADOR I1 (rebuild=identico) : {'OK' if d1 == d2 else 'FALLA'}")
         _linea("=")
-        print("AEC real (Scripts/AEC) NO tocado: inscribir en el durable exige sancion del Estratega (D2).")
+        print("AEC real (../AEC) NO tocado: inscribir en el durable exige sancion del Estratega (D2).")
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 

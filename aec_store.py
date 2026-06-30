@@ -6,7 +6,7 @@ WORM POR CONSTRUCCION: solo existen verbos de APPEND; NO hay update ni delete. E
 se escribe solo si no existe (idempotente: mismo content-hash = no-op). El log solo se abre
 en modo append ('a').
 
-AEC vive FUERA de todo repo (Scripts/AEC) -> "no committeable/pusheable" por topologia,
+AEC vive FUERA de todo repo (hermano del repo: ../AEC) -> "no committeable/pusheable" por topologia,
 no por .gitignore.
 
 Solo stdlib. Sin emojis (encoding Windows).
