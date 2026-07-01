@@ -1,0 +1,132 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-06-30-002-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'Antes de construir la capa de componentes del genoma estetico (Paso
+      7 de la base), verificar la arquitectura CSS de cascade vigente en 2026 para
+      el sistema de diseno: como organizar componentes sin guerras de especificidad.
+
+      '
+    busqueda:
+    - CSS @layer cascade layers design system 2026 best practices component architecture
+    resultados_crudos:
+    - fuente: devtoolbox.dedyn.io
+      texto: 'proven architecture: @layer reset, base, components, utilities, overrides'
+    - fuente: css-cascade-layers.com
+      texto: :where() zeroes specificity
+    - fuente: explainx.ai
+      texto: explicitly define priority order for different CSS sources
+    conclusion: '@layer es el estandar 2026 de sistemas de diseno: fija el orden del
+      cascade independiente de la especificidad y elimina !important. La arquitectura
+      probada pone los componentes en su capa (@layer components) con :where() para
+      especificidad cero, de modo que el proyecto sobrescriba sin pelear. Se adopta
+      para components.css.
+
+      '
+    inferidor:
+      model: estratega/claude-opus-4.8
+      ts: '2026-06-30T17:40:00'
+  - local_id: i2
+    premisa: 'La capa de componentes debe servir 3 marcas (ETCS/SystemaTip/FarmaQ)
+      sobre una estructura compartida. Verificar el patron 2026 de multi-marca con
+      tokens: como lograr una estructura y N pieles sin duplicar componentes.
+
+      '
+    busqueda:
+    - design tokens CSS custom properties multi-brand theming 2026 data-theme scoping
+    resultados_crudos:
+    - fuente: penpot.app
+      texto: define base tokens globally, then override specific tokens within theme
+        selectors
+    - fuente: productrocket.ro
+      texto: Components reference semantic tokens, so they adapt automatically without
+        code changes
+    - fuente: webtoolshub.online
+      texto: all refer to the same hex value in different files
+    conclusion: 'El patron multi-marca 2026 es [data-brand] (o data-theme) que redefine
+      solo la capa semantica; como las variables CSS son vivas, los componentes que
+      referencian semanticos se re-skinean solos sin recompilar. Calza con las dos
+      capas ya existentes del genoma (primitivo->semantico). La fractura de tokens
+      -mismos valores en variables distintas- es el problema #1 documentado del sector;
+      un token unico la previene, y el linter anti-fractura la hace ejecutable.
+
+      '
+    inferidor:
+      model: estratega/claude-opus-4.8
+      ts: '2026-06-30T17:41:00'
+  necesidad:
+    pregunta: 'Que practicas CSS 2026 deben gobernar la capa de componentes del genoma
+      estetico: arquitectura de cascade y mecanismo multi-marca.
+
+      '
+    gatillo: explicito:'verifica practicas 2026 (CSS @layer, tokens) antes de construir'
+    origen_nodo: decision:capa-componentes-en-la-base
+  consultas:
+  - formulacion: CSS @layer cascade layers design system 2026 best practices component
+      architecture
+    referencias:
+    - local_id: r1
+      url: https://css-tricks.com/organizing-design-system-component-patterns-with-css-cascade-layers/
+      content_hash: d98a87672479b68a69db94cdfd52f620f53cfba611e459980380362ced0eb86e
+      capture_ts: '2026-07-01T09:57:17'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r2
+      url: https://css-cascade-layers.com/
+      content_hash: f1ef4b7a2f4333a0cea5e84d09fbd87547896e55a9aff4a0d4c702ec74fd59cb
+      capture_ts: '2026-07-01T09:57:18'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: design tokens CSS custom properties multi-brand theming 2026 data-theme
+      scoping
+    referencias:
+    - local_id: r4
+      url: https://penpot.app/blog/the-developers-guide-to-design-tokens-and-css-variables/
+      content_hash: 9dd0ca589d1c8106d677ea84c8492eb0a3c4c793cf25b481325ec14b4205604d
+      capture_ts: '2026-07-01T09:57:19'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r5
+      url: https://productrocket.ro/articles/design-tokens-guide/
+      content_hash: ab2b934ddbcc51fa442903f11fd3a740ff1fdb618e2de674833d85f4b42831ac
+      capture_ts: '2026-07-01T09:57:19'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r6
+      url: https://www.webtoolshub.online/blog/css-variables-design-tokens-dark-mode-system-2026
+      content_hash: 1eb6029537b4650aca0318c3036e6e3e0a59fa293ade1bfea63bb2b864ce70ca
+      capture_ts: '2026-07-01T09:57:20'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: '@layer es el estandar 2026 de sistemas de diseno: ordena el cascade independiente
+      de la especificidad; los componentes van en su capa con :where() (especificidad
+      cero), eliminando !important.
+
+      '
+    tipo: decision
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: 'Multi-marca por [data-brand] que redefine la capa semantica: los componentes
+      que referencian semanticos se re-skinean solos sin recompilar. Una estructura,
+      N pieles.
+
+      '
+    tipo: decision
+    estatus: afirmado
+    survived_from: r4
+    inferida_por: i2
+  - txt: 'La fractura de tokens (mismos valores en variables distintas, en archivos
+      distintos) es el problema #1 documentado; un token unico la previene -base para
+      el linter anti-fractura ejecutable.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r6
+    inferida_por: i2
