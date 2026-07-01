@@ -138,6 +138,72 @@ def lint(doc, store) -> list:
 
 # ---- ingesta idempotente ----
 
+def session_id_de(doc, session_id: str = None) -> str:
+    """El session_id efectivo del grano (arg explicito > meta.session_id > '')."""
+    meta = (doc.get(ROOT_KEY) or {}).get("meta") or {} if isinstance(doc, dict) else {}
+    return session_id or meta.get("session_id") or ""
+
+
+def derivar_eventos(doc, session_id: str = None) -> list:
+    """Deriva la LISTA COMPLETA de eventos que la ingesta emitiria para este grano, como
+    pares (id, event) en orden de emision. Funcion PURA: no toca el store, no lintea, no
+    filtra por existencia -- solo aplica las reglas de id determinista (huella para la roca,
+    _det_id para el resto). Fuente unica de verdad de los ids: la comparten ingest_doc (que
+    filtra los ya presentes y appendea) y consumido.py (que cruza contra el log). Cambiar la
+    derivacion aqui la cambia en ambos -> no hay drift entre 'que se ingiere' y 'que se
+    considera ingerido'."""
+    aec = doc.get(ROOT_KEY) if isinstance(doc, dict) else None
+    if not isinstance(aec, dict):
+        return []
+    sid = session_id_de(doc, session_id)
+    eventos = []
+
+    # inscripciones: id = huella (dedup por roca, cross-YAML)
+    insc_gid = {}
+    for ins in (aec.get("inscripciones") or []):
+        premisa, busq, crudos = ins.get("premisa"), ins.get("busqueda"), ins.get("resultados_crudos")
+        h = huella_insumos(premisa, busq, crudos)
+        inf = ins.get("inferidor") or {}
+        eventos.append((h, {"ev": "inscripcion", "premisa": premisa, "busqueda": busq,
+                            "resultados_crudos": crudos, "conclusion": ins.get("conclusion", ""),
+                            "inferidor_model": inf.get("model", ""), "inferidor_ts": inf.get("ts", ""),
+                            "huella": h}))
+        insc_gid[ins.get("local_id")] = h
+
+    # necesidad (una por YAML, D-schema-2)
+    nec = aec.get("necesidad") or {}
+    nec_id = _det_id(sid, "nec", nec.get("pregunta"), nec.get("gatillo"))
+    eventos.append((nec_id, {"ev": "necesidad", "pregunta": nec.get("pregunta"),
+                             "gatillo": nec.get("gatillo"), "origen_nodo": nec.get("origen_nodo")}))
+
+    # consultas -> referencias (versiones), I4: version = (referente, content_hash, capture_ts)
+    ref_gid = {}
+    for q in (aec.get("consultas") or []):
+        formulacion = q.get("formulacion")
+        q_id = _det_id(sid, "consulta", nec_id, formulacion)
+        eventos.append((q_id, {"ev": "consulta", "nec_id": nec_id, "formulacion": formulacion}))
+        for r in (q.get("referencias") or []):
+            url = r.get("url")
+            ref = r.get("referente_id") or derivar_referente(url)   # D-schema-1
+            h = _norm_hash(r.get("content_hash"))
+            cap = r.get("capture_ts")
+            vid = _det_id("ref", ref, h, cap)
+            eventos.append((vid, {"ev": "referencia", "referente_id": ref, "content_hash": h,
+                                  "url_cruda": url, "capture_ts": cap,
+                                  "fecha_fuente": r.get("fecha_fuente", "capture"), "q_id": q_id}))
+            ref_gid[r.get("local_id")] = vid
+
+    # afirmaciones (I3: ancladas a referencia + inscripcion)
+    for a in (aec.get("afirmaciones") or []):
+        insc = insc_gid.get(a.get("inferida_por"))
+        ref = ref_gid.get(a.get("survived_from"))
+        aid = _det_id(sid, "af", a.get("txt"), ref, insc)
+        eventos.append((aid, {"ev": "afirmacion", "txt": a.get("txt"), "insc_id": insc,
+                              "ref_id": ref, "tipo": a.get("tipo", "claim"),
+                              "estatus": a.get("estatus", "afirmado")}))
+    return eventos
+
+
 def ingest_doc(doc, store, session_id: str = None) -> dict:
     """Lint (gate) -> emision idempotente de la via al log durable. NO escribe snapshots
     (C3 solo verifica). Devuelve resumen. Re-ingerir el mismo doc = no-op (E1)."""
@@ -145,65 +211,21 @@ def ingest_doc(doc, store, session_id: str = None) -> dict:
     if errs:
         raise IngestaError("lint fallido: " + "; ".join(errs))
 
-    aec = doc[ROOT_KEY]
-    meta = aec.get("meta") or {}
-    sid = session_id or meta.get("session_id") or ""
-
+    sid = session_id_de(doc, session_id)
+    eventos = derivar_eventos(doc, session_id)
     existentes = {ev.get("id") for ev in store.iter_events() if "id" in ev}
-    nuevos = []
 
-    def emit(eid, event):
+    nuevos, af_ids, nec_id = [], [], None
+    for eid, event in eventos:
+        if event["ev"] == "afirmacion":
+            af_ids.append(eid)
+        elif event["ev"] == "necesidad":
+            nec_id = eid
         if eid not in existentes:
             ev = dict(event)
             ev["id"] = eid
             existentes.add(eid)
             nuevos.append(ev)
-        return eid
-
-    # inscripciones: id = huella (dedup por roca, cross-YAML)
-    insc_gid = {}
-    for ins in (aec.get("inscripciones") or []):
-        premisa, busq, crudos = ins["premisa"], ins["busqueda"], ins["resultados_crudos"]
-        h = huella_insumos(premisa, busq, crudos)
-        inf = ins.get("inferidor") or {}
-        emit(h, {"ev": "inscripcion", "premisa": premisa, "busqueda": busq,
-                 "resultados_crudos": crudos, "conclusion": ins.get("conclusion", ""),
-                 "inferidor_model": inf.get("model", ""), "inferidor_ts": inf.get("ts", ""),
-                 "huella": h})
-        insc_gid[ins.get("local_id")] = h
-
-    # necesidad (una por YAML, D-schema-2)
-    nec = aec.get("necesidad") or {}
-    nec_id = _det_id(sid, "nec", nec.get("pregunta"), nec.get("gatillo"))
-    emit(nec_id, {"ev": "necesidad", "pregunta": nec.get("pregunta"),
-                  "gatillo": nec.get("gatillo"), "origen_nodo": nec.get("origen_nodo")})
-
-    # consultas -> referencias (versiones), I4: version = (referente, content_hash, capture_ts)
-    ref_gid = {}
-    for q in (aec.get("consultas") or []):
-        formulacion = q.get("formulacion")
-        q_id = _det_id(sid, "consulta", nec_id, formulacion)
-        emit(q_id, {"ev": "consulta", "nec_id": nec_id, "formulacion": formulacion})
-        for r in (q.get("referencias") or []):
-            url = r.get("url")
-            ref = r.get("referente_id") or derivar_referente(url)   # D-schema-1
-            h = _norm_hash(r.get("content_hash"))
-            cap = r.get("capture_ts")
-            vid = _det_id("ref", ref, h, cap)
-            emit(vid, {"ev": "referencia", "referente_id": ref, "content_hash": h,
-                       "url_cruda": url, "capture_ts": cap,
-                       "fecha_fuente": r.get("fecha_fuente", "capture"), "q_id": q_id})
-            ref_gid[r.get("local_id")] = vid
-
-    # afirmaciones (I3: ancladas a referencia + inscripcion)
-    af_ids = []
-    for a in (aec.get("afirmaciones") or []):
-        insc = insc_gid.get(a.get("inferida_por"))
-        ref = ref_gid.get(a.get("survived_from"))
-        aid = _det_id(sid, "af", a.get("txt"), ref, insc)
-        emit(aid, {"ev": "afirmacion", "txt": a.get("txt"), "insc_id": insc, "ref_id": ref,
-                   "tipo": a.get("tipo", "claim"), "estatus": a.get("estatus", "afirmado")})
-        af_ids.append(aid)
 
     for ev in nuevos:
         store.append_event(ev)
