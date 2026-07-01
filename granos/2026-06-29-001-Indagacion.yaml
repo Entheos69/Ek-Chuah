@@ -1,0 +1,131 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-06-29-001-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'Para justificar la diferencia de precio de un CRM a la medida ($51k,
+      pago unico) frente a soluciones comerciales, se necesita el costo VIGENTE de
+      los CRM comerciales por usuario/mes y su realidad de TCO (implementacion, alzas,
+      lock-in). Sin cifras frescas, el argumento de precio es opinion, no evidencia.
+
+      '
+    busqueda:
+    - Salesforce CRM pricing per user per month 2026 Sales Cloud tiers
+    - HubSpot Zoho CRM pricing 2026 per user month customization limits owned vs subscription
+    resultados_crudos:
+    - fuente: leadhaste.com/blog/salesforce-pricing-2026
+      texto: growing sales teams land on Enterprise at $175 per user per month
+    - fuente: costbench.com (Vendr, 2,216 compras)
+      texto: median annual spend of $74,700
+    - fuente: method.me/blog/how-much-does-salesforce-cost
+      texto: 6% increase across most of its pricing plans
+    - fuente: integrateiq.com/comparisons/hubspot-vs-zoho
+      texto: Enterprise at $150/seat/mo adds custom objects
+    - fuente: checkthat.ai/brands/zoho-corporation/pricing
+      texto: Zoho CRM Enterprise runs $40/user/month compared to Salesforce
+    - fuente: zeeg.me/en/blog/post/zoho-crm-pricing
+      texto: Microsoft Dynamics 365 charges $65 per user per month
+    conclusion: 'Los CRM comerciales son por-asiento, recurrentes a perpetuidad y
+      con lock-in de datos. Premium (Salesforce Enterprise ~$175/usuario, gasto anual
+      mediano real ~$74,700, alza ~6%/ano; HubSpot Enterprise $150; Dynamics $65):
+      el desarrollo a la medida gana TCO y ajuste (cruce <2 anos sumando implementacion
+      y multimarca). Gama baja (Zoho Enterprise $40, ~77% bajo Salesforce): no se
+      compite en precio (cruce ~18 anos) sino en ajuste, propiedad y el muro multimarca,
+      ya que la personalizacion profunda topa limites de nivel y exige un desarrollador
+      igual. Lectura re-derivable, no dato: el precio de lista es piso, no total.
+
+      '
+    inferidor:
+      model: estratega/claude-opus-4.8
+      ts: '2026-06-29T17:10:00'
+  necesidad:
+    pregunta: ¿Que cuestan hoy los CRM comerciales y como se compara su TCO con un
+      desarrollo a la medida de $51k?
+    gatillo: implicito-de:'articular argumentos para justificar la diferencia de precio
+      del CRM a la medida frente a productos comerciales'
+    origen_nodo: null
+  consultas:
+  - formulacion: Salesforce CRM pricing per user per month 2026 Sales Cloud tiers
+    referencias:
+    - local_id: r1
+      url: https://leadhaste.com/blog/salesforce-pricing-2026
+      content_hash: 3fc9d032bd0a7f695f6d8e02399ac88428f9c668806d2ea9c7d028f5c85413d9
+      capture_ts: '2026-06-29T12:38:29'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r2
+      url: https://costbench.com/software/crm/salesforce/
+      content_hash: 53d56d9065cdee73028b5b91632ef197e2386de765147eea0627cea7eac59d9c
+      capture_ts: '2026-06-29T12:38:30'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r3
+      url: https://www.method.me/blog/how-much-does-salesforce-cost/
+      content_hash: c2c66c7099d4b7c8cc2ea4532c9501b20a2019fba54513d4c42e434a9d9cfe33
+      capture_ts: '2026-06-29T12:38:32'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: HubSpot Zoho CRM pricing 2026 per user month customization limits
+      owned vs subscription
+    referencias:
+    - local_id: r4
+      url: https://integrateiq.com/comparisons/hubspot-vs-zoho/
+      content_hash: 3b01a70b65b0a0c68e1ca2a63a8188ee1fb447ac65eeb811cbe1bea03eede154
+      capture_ts: '2026-06-29T12:38:32'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r5
+      url: https://checkthat.ai/brands/zoho-corporation/pricing
+      content_hash: 76bfea894095ef61a19ab1578f2ed4b80a00fae615fc423266f124456ec0fc40
+      capture_ts: '2026-06-29T12:38:34'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r6
+      url: https://zeeg.me/en/blog/post/zoho-crm-pricing
+      content_hash: 055562e8c83deb362d744a751b2e827847b04f5ee5d93649442b9ace2ea8e552
+      capture_ts: '2026-06-29T12:38:35'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: Salesforce Enterprise ronda $175/usuario/mes; es el tier donde aterriza la
+      mayoria de equipos.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: El gasto anual mediano real de Salesforce es ~$74,700 (Vendr, 2,216 compras
+      verificadas).
+    tipo: claim
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i1
+  - txt: 'El precio de lista no es el total: implementacion, admin y recargos elevan
+      el TCO real.'
+    tipo: decision
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i1
+  - txt: Salesforce aplico un alza ~6% en 2025; la suscripcion escala con el tiempo.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r3
+    inferida_por: i1
+  - txt: HubSpot Enterprise cuesta $150/asiento/mes (Professional $90).
+    tipo: claim
+    estatus: afirmado
+    survived_from: r4
+    inferida_por: i1
+  - txt: Zoho Enterprise esta en $40/usuario/mes (~77% bajo Salesforce) pero con techo
+      de personalizacion.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r5
+    inferida_por: i1
+  - txt: Microsoft Dynamics 365 cobra $65/usuario/mes de base.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r6
+    inferida_por: i1

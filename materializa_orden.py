@@ -42,25 +42,40 @@ def _pendiente(r) -> bool:
 
 def materializar_orden(doc, store, fetch=_fetch_urllib, consolidado_por=None, clock=None) -> dict:
     """Baja la roca de cada referencia pendiente a WORM y rellena content_hash + capture_ts.
-    Muta doc in-place. Devuelve resumen. NO toca graph_aec."""
+    Muta doc in-place. Devuelve resumen. NO toca graph_aec.
+
+    Resiliente por-referencia: una URL muerta (DNS caido, host colgado, 404) NO aborta el
+    grano ni pierde el progreso de las demas. La ref fallida queda en MATERIALIZAR (pendiente)
+    y se reporta en 'fallidas' (con su load_bearing). El WORM idempotente hace inocuo el
+    progreso parcial: re-correr solo re-intenta las pendientes. La ingesta (gate C3) sigue
+    rechazando el grano mientras quede cualquier ref sin roca -> nada nace sin ancla."""
     clock = clock or (lambda: datetime.datetime.now().strftime(ISO))
     aec = doc.get(ROOT_KEY) or {}
     if consolidado_por:
         aec.setdefault("meta", {})["consolidado_por"] = consolidado_por
 
-    bajadas, ya = [], []
+    lb = {a.get("survived_from") for a in (aec.get("afirmaciones") or [])
+          if a.get("survived_from")}
+    bajadas, ya, fallidas = [], [], []
     for q in (aec.get("consultas") or []):
         for r in (q.get("referencias") or []):
+            lid = r.get("local_id")
             if not _pendiente(r):
-                ya.append(r.get("local_id"))
+                ya.append(lid)
                 continue
-            data = fetch(r["url"])                 # descarga (red)
+            try:
+                data = fetch(r["url"])             # descarga (red)
+            except Exception as e:                 # una URL muerta no tumba el grano entero
+                fallidas.append({"local_id": lid, "url": r.get("url"),
+                                 "error": f"{type(e).__name__}: {e}",
+                                 "load_bearing": lid in lb})
+                continue                           # la ref queda en MATERIALIZAR (pendiente)
             h = store.put_snapshot(data)           # WORM idempotente (mismo hash = no-op)
             r["content_hash"] = h
             r["capture_ts"] = clock()              # reloj sancionado en la puerta
-            bajadas.append({"local_id": r.get("local_id"), "url": r["url"],
+            bajadas.append({"local_id": lid, "url": r["url"],
                             "content_hash": h, "bytes": len(data)})
-    return {"materializadas": bajadas, "ya_materializadas": ya,
+    return {"materializadas": bajadas, "ya_materializadas": ya, "fallidas": fallidas,
             "consolidado_por": (aec.get("meta") or {}).get("consolidado_por")}
 
 
@@ -92,17 +107,28 @@ def _main(argv=None):
                     help="ruta de salida (default: in-place, el mismo archivo del grano)")
     ap.add_argument("--consolidado-por", default=None,
                     help="actor local que materializa (Guardian / IA-aux)")
+    ap.add_argument("--timeout", type=int, default=30,
+                    help="timeout de descarga por URL en segundos (default: 30)")
     args = ap.parse_args(argv)
 
     from aec_store import AecStore
     store = AecStore(args.aec)
-    res = materializar_archivo(args.orden, store, out_path=args.out,
+    fetch = lambda u: _fetch_urllib(u, timeout=args.timeout)
+    res = materializar_archivo(args.orden, store, out_path=args.out, fetch=fetch,
                                consolidado_por=args.consolidado_por)
     print(f"MATERIALIZADAS: {len(res['materializadas'])} | ya: {len(res['ya_materializadas'])} | "
-          f"consolidado_por: {res['consolidado_por']}")
+          f"fallidas: {len(res['fallidas'])} | consolidado_por: {res['consolidado_por']}")
     for b in res["materializadas"]:
         print(f"  {b['local_id']}: {b['content_hash'][:16]}... ({b['bytes']} bytes) <- {b['url']}")
+    for f in res["fallidas"]:
+        sev = "BLOQUEANTE (load-bearing)" if f["load_bearing"] else "AVISO (no load-bearing)"
+        print(f"  FALLIDA {f['local_id']} [{sev}] <- {f['url']}")
+        print(f"          {f['error']}")
     print(f"ingestible: {res['out']}")
+    if res["fallidas"]:
+        print("PARCIAL: quedan refs en MATERIALIZAR. Corre 'python prevuelo.py "
+              f"{res['out']}' para el diagnostico; reemplaza/quita las fuentes muertas y re-materializa.")
+        return 1
     print("siguiente: python ingesta.py", res["out"], "--aec", args.aec, "--db ek_chuah.db")
     return 0
 
