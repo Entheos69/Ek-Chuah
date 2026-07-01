@@ -1,0 +1,144 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-06-30-001-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'Antes de fijar en el TRD la estrategia de aislamiento multimarca del
+      CRM, verificar contra evidencia 2026 el estado y la madurez de las opciones
+      de multi-tenancy en Django 5.2 (schema-por-tenant vs row-level), en vez de decidir
+      de memoria.
+
+      '
+    busqueda:
+    - django-tenants Django 5.2 compatibility 2025 multi-tenant schema
+    resultados_crudos:
+    - fuente: pypi.org/project/django-tenants
+      texto: Tenant support for Django using PostgreSQL schemas
+    - fuente: testdriven.io/blog/django-multi-tenant
+      texto: each tenant is assigned its schema and a domain name
+    - fuente: pypi.org/project/django-tenant-users
+      texto: 'Django :: 5.2'
+    conclusion: 'Schema-por-marca via django-tenants es el fit: modelo "base compartida,
+      schemas separados", tenant resuelto por hostname (calza con 3 marcas = 3 dominios),
+      aislamiento por construccion y compatible con Django 5.2 (django-tenant-users
+      lo declara). Se elige sobre row-level por honrar el aislamiento-desde-el-dia-cero
+      con solo 3 tenants fijos, donde la complejidad dinamica de SaaS casi no aplica.
+      Interpretacion fechada, no dato.
+
+      '
+    inferidor:
+      model: estratega/claude-opus-4-8
+      ts: '2026-06-30T11:00:00'
+  - local_id: i2
+    premisa: 'Antes de fijar en el TRD el mecanismo de countdowns y escalamientos
+      (riesgo de scheduler en Railway), verificar contra evidencia 2026 las opciones
+      de tareas en segundo plano en Django y su costo operativo (Celery vs Django-Q2
+      vs cron).
+
+      '
+    busqueda:
+    - Django background tasks scheduler 2026 Django-Q2 vs Celery Railway cron comparison
+    resultados_crudos:
+    - fuente: technetexperts.com
+      texto: Django Q2 integrates scheduling natively into the Django Admin interface
+    - fuente: loopwerk.io
+      texto: scheduled tasks can at most run once a minute
+    - fuente: softaims.com
+      texto: Celery with a Redis broker remains the production standard
+    conclusion: 'Django-Q2 es el fit para este CRM: usa el ORM como broker (sin Redis),
+      agenda de forma nativa y deja logs visibles en admin (alinea con visibilidad,
+      Art. IV). Su limite de "una vez por minuto" es irrelevante porque los countdowns
+      se miden en horas/dias. Celery queda como sobreingenieria a esta escala. Interpretacion
+      fechada, no dato.
+
+      '
+    inferidor:
+      model: estratega/claude-opus-4-8
+      ts: '2026-06-30T11:06:00'
+  necesidad:
+    pregunta: 'Que dice la evidencia 2026 sobre multi-tenancy en Django 5.2 y sobre
+      scheduling en Railway, para fijar las dos bisagras del TRD del CRM multimarca
+      sin cementarlas de memoria.
+
+      '
+    gatillo: explicito:'Verifica evidencia 2026 primero, luego fija el TRD'
+    origen_nodo: null
+  consultas:
+  - formulacion: django-tenants Django 5.2 compatibility 2025 multi-tenant schema
+    referencias:
+    - local_id: r1
+      url: https://pypi.org/project/django-tenants/
+      content_hash: 32ed63159c77e21ee19ca1b9aa3213ccf0218eb59539560b132a8e68ef0e18ea
+      capture_ts: '2026-06-30T22:52:57'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r2
+      url: https://testdriven.io/blog/django-multi-tenant/
+      content_hash: 914fb1949f50d372bcae0b1a0c30ada13d46980a69dafe787ad2ca99ba705535
+      capture_ts: '2026-06-30T22:52:58'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r3
+      url: https://pypi.org/project/django-tenant-users/
+      content_hash: 32ed63159c77e21ee19ca1b9aa3213ccf0218eb59539560b132a8e68ef0e18ea
+      capture_ts: '2026-06-30T22:52:58'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: Django background tasks scheduler 2026 Django-Q2 vs Celery Railway
+      cron comparison
+    referencias:
+    - local_id: r4
+      url: https://www.technetexperts.com/celery-vs-django-q2-architecture/
+      content_hash: e6a134223b1b64a15e31f7770d7fdd33bbd5c773f3a1083334e4560c1ed46620
+      capture_ts: '2026-06-30T22:53:00'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r5
+      url: https://www.loopwerk.io/articles/2025/django-task-queues/
+      content_hash: 62148c9541e4a06d94258eacdca7528ee5c2e2d73a0a7a61c482d2703dcd6d29
+      capture_ts: '2026-06-30T22:53:01'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r6
+      url: https://softaims.com/blog/django-celery-background-tasks-production-2026
+      content_hash: 25d97d4e8111c1620c297e7a42062bf864e1e2bdab970fb70679c472cc0e8a04
+      capture_ts: '2026-06-30T22:53:02'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: 'El CRM multimarca adopta schema-por-marca via django-tenants: aislamiento
+      por construccion, tenant resuelto por hostname (3 marcas = 3 dominios), un solo
+      PostgreSQL.
+
+      '
+    tipo: decision
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: 'django-tenants / django-tenant-users declara compatibilidad con Django 5.2
+      (verificado 2026).
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r3
+    inferida_por: i1
+  - txt: 'El scheduler de countdowns y SLA es Django-Q2: ORM como broker (sin Redis),
+      agendado nativo y visible en admin.
+
+      '
+    tipo: decision
+    estatus: afirmado
+    survived_from: r4
+    inferida_por: i2
+  - txt: 'El agendado de Django-Q2 corre a lo mas una vez por minuto (modelo cron);
+      irrelevante para countdowns de horas/dias.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r5
+    inferida_por: i2

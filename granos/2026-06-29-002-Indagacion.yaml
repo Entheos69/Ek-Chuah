@@ -1,0 +1,108 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-06-29-001-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'Alex (asistente de ventas) habilita escritura en L3. Falta el patron
+      externo validado de como confirmar una accion del agente ANTES de ejecutarla
+      (preview -> confirm) y como gobernarla por riesgo, para anclar el diseno endogeno
+      (cs_: Peldano 2 ''guiar sin ejecutar'') con evidencia exogena.
+
+      '
+    busqueda:
+    - human-in-the-loop confirmation AI agents tool approval
+    resultados_crudos:
+    - fuente: aws.amazon.com (Bedrock Agents blog)
+      texto: critical actions are validated by users before execution
+    - fuente: learn.microsoft.com (Agent Framework, tool-approval)
+      texto: instead of completing with a final answer
+    - fuente: agno.com (blog, HITL controls)
+      texto: execution pauses and a RunRequirement is surfaced.
+    - fuente: haystack.deepset.ai (tutorial 47)
+      texto: AlwaysAskPolicy - Always asks for approval before running.
+    - fuente: devleader.ca (MS Agent Framework, tool-approval)
+      texto: inject the rejection reason back into the conversation so the agent can
+        reconsider
+    conclusion: 'Patron externo convergente: el agente surfacea la accion propuesta
+      y pausa hasta aprobacion humana, configurable por politica de riesgo; el rechazo
+      no es callejon sin salida sino que retroalimenta para que el agente reconsidere.
+      Es el analogo de escritura de ''guiar sin ejecutar'' (Peldano 2): preview ->
+      confirm para L3, gateado por R0-R3 del genoma. Lectura re-derivable, no dato.
+
+      '
+    inferidor:
+      model: estratega/claude-opus-4.8
+      ts: '2026-06-29T11:00:00'
+  necesidad:
+    pregunta: Como confirmar una accion de escritura del agente (Alex L3) antes de
+      ejecutarla -patron preview->confirm- y como gobernarla por riesgo.
+    gatillo: explicito:'inauguremos esta forma de analisis; el Estratega sanciona
+      la entrada al grafo; autorizo la ruta (a)+(c); vamos por a)'
+    origen_nodo: null
+  consultas:
+  - formulacion: human-in-the-loop confirmation AI agents tool approval
+    referencias:
+    - local_id: r1
+      url: https://aws.amazon.com/blogs/machine-learning/implement-human-in-the-loop-confirmation-with-amazon-bedrock-agents/
+      content_hash: 5fa2a2997061223d2c99e74c7e086faedf2867a1a4c6d706483716e403dcf8bd
+      capture_ts: '2026-06-29T12:39:58'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r2
+      url: https://learn.microsoft.com/en-us/agent-framework/agents/tools/tool-approval
+      content_hash: 2200141ee93b036ff2bcad6315ccd6dc606da2d8c41e4186e7904612bfd4fc6c
+      capture_ts: '2026-06-29T12:39:59'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r3
+      url: https://www.agno.com/blog/how-to-add-human-in-the-loop-controls-to-ai-agents-that-actually-run-in-production
+      content_hash: 6fb97d6cf7aff73034f6aeb362049919a6ad132cf5eb4e2d207c2e9aeebebdbd
+      capture_ts: '2026-06-29T12:40:00'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r4
+      url: https://haystack.deepset.ai/tutorials/47_human_in_the_loop_agent
+      content_hash: b45c2f01569b132de2e8be14f942e17ef45563c44bded804daa3489d17faa671
+      capture_ts: '2026-06-29T12:40:02'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r5
+      url: https://www.devleader.ca/2026/03/11/tool-approval-and-humanintheloop-in-microsoft-agent-framework
+      content_hash: 9003142999e75951ae68c83ad99bbd003a309c878c407f9140461ac39deae26d
+      capture_ts: '2026-06-29T12:40:02'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: Las acciones criticas se validan con confirmacion de usuario antes de ejecutar,
+      como feature de primera clase del agente.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: HITL pausa el run para pedir input y reanuda segun la respuesta; no termina
+      con respuesta final.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i1
+  - txt: El checkpoint (requires_confirmation) muestra QUE va a hacer el agente (RunRequirement)
+      antes de correr = tarjeta de preview.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r3
+    inferida_por: i1
+  - txt: La confirmacion es configurable por politica (AlwaysAsk/NeverAsk) -> mapea
+      a gatear por riesgo R0-R3 del genoma.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r4
+    inferida_por: i1
+  - txt: 'Un propose-confirm rechazado retroalimenta: la razon del rechazo vuelve
+      a la conversacion y el agente reconsidera (no es callejon).'
+    tipo: claim
+    estatus: afirmado
+    survived_from: r5
+    inferida_por: i1

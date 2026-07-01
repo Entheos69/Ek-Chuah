@@ -1,0 +1,68 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-06-29-002-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'El ''globo de comunicacion'' de Alex es superficie PUSH proactiva con
+      riesgo conocido de fatiga (S44). Falta evidencia exogena de cuando una intervencion
+      proactiva ayuda vs estorba (intrusividad) y bajo que criterio el asistente debe
+      callar, para anclar la gobernanza anti-fatiga ya decidida en cs_.
+
+      '
+    busqueda:
+    - proactive AI assistant intrusiveness when to interrupt
+    resultados_crudos:
+    - fuente: windowsforum.com (Clippy->Copilot thread)
+      texto: Instead of reducing friction, the assistant often added another layer
+        of cognitive load.
+    - fuente: arxiv.org/html/2410.04596v1 (CHI 2025, Need Help?)
+      texto: irrelevant and untimely proactive messages may compromise the success
+        of the interaction
+    conclusion: 'Evidencia externa convergente: la proactividad mal calibrada anade
+      carga cognitiva en vez de reducir friccion (leccion Clippy->Copilot), y toda
+      intervencion proactiva debe pesar beneficio vs costo de intrusion, decidiendo
+      por timing/contexto si interviene o calla (CHI 2025). Sostiene la gobernanza
+      anti-fatiga del globo: PULL por defecto, PUSH solo cuando beneficio > costo.
+      Saber callar es funcion critica, no ausencia de feature. Lectura re-derivable.
+
+      '
+    inferidor:
+      model: estratega/claude-opus-4.8
+      ts: '2026-06-29T11:00:00'
+  necesidad:
+    pregunta: Cuando una intervencion proactiva del asistente ayuda vs estorba (intrusividad)
+      y bajo que criterio decide callar.
+    gatillo: explicito:'inauguremos esta forma de analisis; el Estratega sanciona
+      la entrada al grafo; autorizo la ruta (a)+(c); vamos por a)'
+    origen_nodo: null
+  consultas:
+  - formulacion: proactive AI assistant intrusiveness when to interrupt
+    referencias:
+    - local_id: r1
+      url: https://windowsforum.com/threads/clippy-lessons-for-microsoft-copilot-when-assistants-become-intrusive.411922/
+      content_hash: a52313609263e3fe60b1242f2baf7d06c10a59fc87dadfa58e28ba9f358c96e2
+      capture_ts: '2026-06-29T12:40:42'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r2
+      url: https://arxiv.org/html/2410.04596v1
+      content_hash: 537248f73db41e1538d7d5ecc797d4a0a711c21bac483f05498f2bfa77a30233
+      capture_ts: '2026-06-29T12:40:43'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: La proactividad mal calibrada anade carga cognitiva en vez de reducir friccion;
+      saber callar es funcion critica.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: Toda intervencion proactiva pesa beneficio vs costo de intrusion; mensajes
+      irrelevantes o a destiempo comprometen la interaccion.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i1
