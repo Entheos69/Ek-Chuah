@@ -1,6 +1,6 @@
 ---
 name: procesar-granos
-description: Modo procesamiento de granos (Ek-Chuah). Usa esta skill para consolidar/procesar/ingerir un grano YAML-AEC (granos/*.yaml) al durable WORM y a graph_aec -- llevar un grano de ORDEN (content_hash MATERIALIZAR) a ingerido. Cubre el pre-flight preventivo de URLs, el fix de SSL (Norton), la materializacion resiliente, la ingesta con gate C3, y como resolver fuentes muertas sin romper la integridad epistemica. Dispara con "procesa el grano", "consolida el grano", "ingiere el YAML-AEC", "materializa la orden", "modo procesamiento de granos".
+description: Modo consumo / procesamiento de granos (Ek-Chuah). Usa esta skill para consolidar/procesar/ingerir/CONSUMIR un grano YAML-AEC (granos/*.yaml) al durable WORM y a graph_aec -- llevar un grano de ORDEN (content_hash MATERIALIZAR) a ingerido, y para VERIFICAR si ya fue consumido. Cubre el pre-flight preventivo de URLs, el fix de SSL (Norton), la materializacion resiliente, la ingesta con gate C3, la verificacion de consumo (consumido.py), y como resolver fuentes muertas sin romper la integridad epistemica. Dispara con "procesa el grano", "consolida el grano", "consume el grano", "ingiere el YAML-AEC", "materializa la orden", "verifica si el grano fue consumido", "modo consumo", "modo procesamiento de granos". Para trabajar sobre el codigo/maquinaria del pipeline (no sobre un grano), usa la skill "desarrollar-ek-chuah".
 ---
 
 # Modo procesamiento de granos (Ek-Chuah)
@@ -77,6 +77,24 @@ Exit 0 = sin bloqueantes. Exit 1 = hay bloqueantes; no avances hasta resolver.
 
 Regla de decision: **load-bearing muerta -> reemplaza; no load-bearing muerta -> quita.**
 Nunca inventes la roca.
+
+## Verificar el consumo (¿ya fue ingerido?)
+
+Para saber si un grano YA fue consumido (ingerido al durable) **sin tocar la red ni escribir**,
+y sin depender de la palabra de nadie:
+
+    python consumido.py                         # escanea granos/ y da el resumen
+    python consumido.py granos/<grano>.yaml     # un grano en concreto
+    python consumido.py --json                  # salida maquinable (gates/scripts)
+
+- Cruza los ids **deterministas** del grano contra el log durable (misma `derivar_eventos` que
+  usa la ingesta) -> **CONSUMIDO** == "la ingesta seria un no-op". A diferencia del gate C3,
+  **NO exige que las rocas esten en WORM**: solo compara ids. CERO red, CERO escritura.
+- Estados: **CONSUMIDO** (todos los eventos en el log), **NO-CONSUMIDO** (ninguno),
+  **PARCIAL** (grano editado tras ingerir: las afirmaciones/refs cambiadas ya no matchean),
+  **VACIO** (no es un YAML-AEC).
+- **Exit 1** si algo no esta consumido -> sirve de gate en scripts.
+- Úsalo tras ingerir para confirmar, o al retomar para saber que falta.
 
 ## Export a la nube (camino B, opcional, tras ingerir)
 
