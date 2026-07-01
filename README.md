@@ -21,7 +21,8 @@ Greenfield. Solo stdlib. El **durable** vive FUERA de este repo, en `../AEC/`
 | `via_epistemica.py` | Emision de eventos: necesidad -> consulta -> referencia(version) -> afirmacion. |
 | `proyeccion.py` | Reconstruye la `.db` del log + consultas (traza, huerfanos, I2, version_actual). |
 | `materializa.py` | Materializador programatico (snapshot a WORM + via en un paso; PoC/demo). |
-| `materializa_orden.py` | Paso 2 (materializacion del flujo orden): baja cada URL de una orden YAML-AEC a WORM y rellena `content_hash`+`capture_ts`. Aqui vive la red. |
+| `prevuelo.py` | Pre-flight del paso 2: sondea cada URL pendiente ANTES de materializar (read-only, no escribe WORM) y clasifica los huecos por severidad: ref inalcanzable que sostiene una afirmacion = BLOQUEANTE; si no la sostiene = AVISO. Localiza URLs muertas (DNS caido / host colgado / 404) de forma preventiva. |
+| `materializa_orden.py` | Paso 2 (materializacion del flujo orden): baja cada URL de una orden YAML-AEC a WORM y rellena `content_hash`+`capture_ts`. Aqui vive la red. Resiliente por-referencia: una URL muerta no aborta el grano ni pierde el progreso de las demas (la fallida queda en `MATERIALIZAR` y se reporta con su severidad). |
 | `ingesta.py` | Paso 3 (ingesta): YAML-AEC -> lint C1-C7 -> verifica hash en WORM (C3) -> puebla `graph_aec`. Idempotente, CERO red. |
 | `exporta_log.py` | Borde local -> nube (camino B): empuja `log/inscripciones.jsonl` a la tabla `aec_log` del Postgres MCP-AEC. Idempotente por `line_sha` (ON CONFLICT DO NOTHING). Membrana: SOLO el log, nunca snapshots. |
 
@@ -59,6 +60,11 @@ reusar el nombre). El durable WORM (`../AEC`) y la proyeccion (`*.db`) NO son gr
 
 El grano llega como ORDEN con `content_hash`/`capture_ts` = `MATERIALIZAR`. Dos pasos,
 **in-place** (el mismo archivo evoluciona orden -> materializado -> ingerido):
+
+    # paso 1 (preventivo): sondea las URLs ANTES de bajar nada; localiza huecos por severidad
+    python prevuelo.py granos/2026-06-27-001-Indagacion.yaml
+    #   BLOQUEANTE (ref load-bearing muerta) -> reemplaza la fuente por una roca viva equivalente
+    #   AVISO (ref no load-bearing muerta)    -> quitala del grano (quitar > fabricar procedencia)
 
     # paso 2: baja la roca de cada URL a WORM y rellena los placeholders (RED; sancion del actor local)
     python materializa_orden.py granos/2026-06-27-001-Indagacion.yaml --aec ../AEC --consolidado-por "Guardian"
