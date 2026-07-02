@@ -25,7 +25,7 @@ import proyeccion                                   # noqa: E402
 class Substrato(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
-        self.store = AecStore(os.path.join(self.tmp, "AEC"))
+        self.store = AecStore(os.path.join(self.tmp, "AEC"), create=True)
         self.db = os.path.join(self.tmp, "ek_chuah.db")
         self.via = ViaEmision(self.store)
 

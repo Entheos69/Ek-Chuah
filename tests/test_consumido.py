@@ -27,7 +27,7 @@ from test_ingesta import _doc, SNAP                  # noqa: E402
 class Consumido(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
-        self.store = AecStore(os.path.join(self.tmp, "AEC"))
+        self.store = AecStore(os.path.join(self.tmp, "AEC"), create=True)
 
     def tearDown(self):
         shutil.rmtree(self.tmp, ignore_errors=True)

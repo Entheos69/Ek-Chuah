@@ -19,8 +19,20 @@ from nucleo import ISO, content_hash
 
 
 class AecStore:
-    def __init__(self, root: str):
+    def __init__(self, root: str, create: bool = False):
         self.root = os.path.abspath(root)
+        # Un WORM no se crea en silencio. Un --aec tipeado mal (p.ej. backslashes
+        # comidos por el shell, o una ruta relativa equivocada) NO debe parir un
+        # durable fantasma vacio: eso enmascara el error y contamina el arbol.
+        # Si el root no existe, exigir create=True explicito (los CLI lo pasan via
+        # --init, reservado al bootstrap). Un root existente se acepta y solo se le
+        # completan los subdirectorios log/ y snapshots/.
+        if not os.path.isdir(self.root) and not create:
+            raise FileNotFoundError(
+                f"AEC root no existe: {self.root}\n"
+                "Es un durable WORM; no se crea por accidente. Verifica la ruta "
+                "(usa POSIX o ../AEC, nunca backslashes desnudos) o pasa --init "
+                "si de verdad quieres bootstrappear un durable nuevo aqui.")
         self.log_dir = os.path.join(self.root, "log")
         self.snap_dir = os.path.join(self.root, "snapshots")
         os.makedirs(self.log_dir, exist_ok=True)

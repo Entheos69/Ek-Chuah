@@ -109,10 +109,12 @@ def _main(argv=None):
                     help="actor local que materializa (Guardian / IA-aux)")
     ap.add_argument("--timeout", type=int, default=30,
                     help="timeout de descarga por URL en segundos (default: 30)")
+    ap.add_argument("--init", action="store_true",
+                    help="bootstrap: crea el durable WORM si no existe (uso raro; por defecto falla ruidoso)")
     args = ap.parse_args(argv)
 
     from aec_store import AecStore
-    store = AecStore(args.aec)
+    store = AecStore(args.aec, create=args.init)
     fetch = lambda u: _fetch_urllib(u, timeout=args.timeout)
     res = materializar_archivo(args.orden, store, out_path=args.out, fetch=fetch,
                                consolidado_por=args.consolidado_por)

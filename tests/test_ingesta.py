@@ -58,7 +58,7 @@ def _doc(hash_val):
 class Ingesta(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
-        self.store = AecStore(os.path.join(self.tmp, "AEC"))
+        self.store = AecStore(os.path.join(self.tmp, "AEC"), create=True)
         self.db = os.path.join(self.tmp, "ek_chuah.db")
 
     def tearDown(self):
@@ -187,6 +187,37 @@ class Ingesta(unittest.TestCase):
         self.assertTrue(any(e.startswith("C6") for e in lint(doc, self.store)))
         with self.assertRaises(IngestaError):
             ingest_doc(doc, self.store)
+
+    # ---- E: lint de EMISION (store=None) omite C3/C5 pero conserva C1/C2/C4/C6 ----
+    def test_emision_lint_omite_C3_C5(self):
+        """El grano pre-materializado (placeholders) PASA el lint de emision aunque
+        fallaria C3/C5 en la ingesta: emision e ingesta comparten UN linter, con la
+        fase decidida por store (None=emision)."""
+        doc = _doc("MATERIALIZAR")
+        doc["ek_chuah_aec"]["consultas"][0]["referencias"][0]["capture_ts"] = "MATERIALIZAR"
+        # con store: falla C3 (sin roca) y C5 (capture_ts no-ISO)
+        con_store = lint(doc, self.store)
+        self.assertTrue(any(e.startswith("C3") for e in con_store))
+        self.assertTrue(any(e.startswith("C5") for e in con_store))
+        # en emision (store=None): limpio -- C3/C5 se difieren a post-materializacion
+        self.assertEqual(lint(doc, store=None), [], "el lint de emision no debe exigir WORM")
+        self.assertEqual(lint(doc), [], "el default (sin store) es fase emision")
+
+    # ---- E: emision NO afloja los checks estructurales (C4 sigue bloqueando) ----
+    def test_emision_lint_conserva_C4(self):
+        doc = _doc("MATERIALIZAR")
+        doc["ek_chuah_aec"]["afirmaciones"][0]["survived_from"] = "rX"
+        self.assertTrue(any(e.startswith("C4") for e in lint(doc, store=None)),
+                        "emision debe seguir detectando afirmaciones huerfanas")
+
+    # ---- C: un WORM no se crea por accidente (guard anti-carpeta-fantasma) ----
+    def test_worm_no_se_crea_sin_init(self):
+        faltante = os.path.join(self.tmp, "ruta_tipeada_mal")
+        with self.assertRaises(FileNotFoundError):
+            AecStore(faltante)                        # root inexistente + sin create -> ruidoso
+        self.assertFalse(os.path.exists(faltante), "el guard no debe dejar rastro en disco")
+        AecStore(faltante, create=True)               # bootstrap explicito -> ok
+        self.assertTrue(os.path.isdir(os.path.join(faltante, "log")))
 
     # ---- ingesta desde archivo (camino yaml.safe_load + CLI) ----
     def test_ingest_desde_archivo(self):

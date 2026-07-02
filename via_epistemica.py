@@ -82,3 +82,27 @@ class ViaEmision:
                                  "referente_a": referente_a, "referente_b": referente_b,
                                  "relacion": relacion, "gatillo": gatillo})
         return sid
+
+    REVISION_ESTATUS = ("superada", "retractada")
+
+    def revision(self, target_af: str, nuevo_estatus: str, gatillo: str,
+                 motivo: str = None, reemplazada_por: str = None) -> str:
+        """G-post: RECONSIDERACION del camino epistemico. Supersede/retracta una
+        afirmacion durable SIN mutar el log (WORM): emite un evento append-only que la
+        proyeccion aplica al reconstruir (voltea afirmacion.estatus). Espejo de
+        referente_assert: gobernado, auditado por gatillo, NO-destructivo -- la
+        afirmacion superada se conserva (Forma-vs-Valor), solo cambia su estatus efectivo.
+
+          nuevo_estatus : 'superada' (hay una mejor, ver reemplazada_por) | 'retractada'
+                          (se cae sin reemplazo, p.ej. cita fabricada detectada).
+          reemplazada_por : af_id de la afirmacion que la sustituye (opcional).
+          gatillo : quien sanciona la reconsideracion (D2 accountability)."""
+        if nuevo_estatus not in self.REVISION_ESTATUS:
+            raise ValueError(f"nuevo_estatus invalido: {nuevo_estatus} "
+                             f"(validos: {self.REVISION_ESTATUS})")
+        rid = _id()
+        self.store.append_event({"ev": "revision", "id": rid, "target_af": target_af,
+                                 "nuevo_estatus": nuevo_estatus,
+                                 "reemplazada_por": reemplazada_por,
+                                 "motivo": motivo, "gatillo": gatillo})
+        return rid

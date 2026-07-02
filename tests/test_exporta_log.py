@@ -70,7 +70,7 @@ class ExportaLogTest(unittest.TestCase):
         self._saved_db_url = os.environ.pop("DATABASE_URL", None)
         self.tmp = tempfile.mkdtemp(prefix="aec_export_")
         self.aec = os.path.join(self.tmp, "AEC")
-        self.store = AecStore(self.aec)
+        self.store = AecStore(self.aec, create=True)
         self.evs, self.snap_h, self.rock = _populate(self.store)
         self.log_path = log_path_for(self.aec)
 

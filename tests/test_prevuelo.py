@@ -97,7 +97,7 @@ class Prevuelo(unittest.TestCase):
 class ResilienciaPaso2(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
-        self.store = AecStore(os.path.join(self.tmp, "AEC"))
+        self.store = AecStore(os.path.join(self.tmp, "AEC"), create=True)
         self.clock = lambda: "2026-07-01T10:00:00"
 
     def tearDown(self):

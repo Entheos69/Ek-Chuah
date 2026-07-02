@@ -30,7 +30,7 @@ def _linea(c="-"):
 def main():
     tmp = tempfile.mkdtemp()
     try:
-        store = AecStore(os.path.join(tmp, "AEC"))
+        store = AecStore(os.path.join(tmp, "AEC"), create=True)
         mat = Materializador(store)
         db = os.path.join(tmp, "ek_chuah.db")
 

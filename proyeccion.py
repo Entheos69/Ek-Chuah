@@ -31,13 +31,16 @@ CREATE TABLE necesidad(id TEXT PRIMARY KEY, pregunta TEXT, gatillo TEXT,
 CREATE TABLE consulta(id TEXT PRIMARY KEY, nec_id TEXT, formulacion TEXT, ts TEXT);
 CREATE TABLE referente(referente_id TEXT PRIMARY KEY, primera_captura TEXT);
 CREATE TABLE version(id TEXT PRIMARY KEY, referente_id TEXT, content_hash TEXT,
-    url_cruda TEXT, capture_ts TEXT, fecha_fuente TEXT, q_id TEXT, ts TEXT);
+    url_cruda TEXT, capture_ts TEXT, fecha_fuente TEXT, q_id TEXT, estatus TEXT, ts TEXT);
 CREATE TABLE afirmacion(id TEXT PRIMARY KEY, txt TEXT, insc_id TEXT, ref_id TEXT,
     tipo TEXT, estatus TEXT, ts TEXT);
 CREATE TABLE referente_assert(id TEXT, referente_a TEXT, referente_b TEXT,
     relacion TEXT, gatillo TEXT, ts TEXT);
+CREATE TABLE revision(id TEXT PRIMARY KEY, target_af TEXT, nuevo_estatus TEXT,
+    reemplazada_por TEXT, motivo TEXT, gatillo TEXT, ts TEXT);
 CREATE INDEX ix_ver_ref ON version(referente_id);
 CREATE INDEX ix_ins_huella ON inscripcion(huella);
+CREATE INDEX ix_rev_target ON revision(target_af);
 """
 
 
@@ -69,9 +72,10 @@ def reconstruir(store, db_path: str) -> sqlite3.Connection:
             cx.execute("UPDATE referente SET primera_captura=? "
                        "WHERE referente_id=? AND primera_captura>?",
                        (ev["capture_ts"], ref, ev["capture_ts"]))
-            cx.execute("INSERT OR IGNORE INTO version VALUES(?,?,?,?,?,?,?,?)",
+            cx.execute("INSERT OR IGNORE INTO version VALUES(?,?,?,?,?,?,?,?,?)",
                        (ev["id"], ref, ev["content_hash"], ev["url_cruda"],
-                        ev["capture_ts"], ev["fecha_fuente"], ev["q_id"], ts))
+                        ev["capture_ts"], ev["fecha_fuente"], ev["q_id"],
+                        ev.get("estatus", "viva"), ts))
         elif kind == "afirmacion":
             cx.execute("INSERT OR IGNORE INTO afirmacion VALUES(?,?,?,?,?,?,?)",
                        (ev["id"], ev["txt"], ev["insc_id"], ev.get("ref_id"),
@@ -80,6 +84,15 @@ def reconstruir(store, db_path: str) -> sqlite3.Connection:
             cx.execute("INSERT INTO referente_assert VALUES(?,?,?,?,?,?)",
                        (ev["id"], ev["referente_a"], ev["referente_b"],
                         ev["relacion"], ev["gatillo"], ts))
+        elif kind == "revision":
+            # G-post: reconsideracion append-only. La afirmacion target ya fue insertada
+            # (la revision llega despues en el log) -> voltear su estatus efectivo. La
+            # afirmacion NO se borra (Forma-vs-Valor); queda con estatus superada/retractada.
+            cx.execute("INSERT OR IGNORE INTO revision VALUES(?,?,?,?,?,?,?)",
+                       (ev["id"], ev["target_af"], ev["nuevo_estatus"],
+                        ev.get("reemplazada_por"), ev.get("motivo"), ev.get("gatillo"), ts))
+            cx.execute("UPDATE afirmacion SET estatus=? WHERE id=?",
+                       (ev["nuevo_estatus"], ev["target_af"]))
     cx.commit()
     return cx
 
@@ -99,6 +112,19 @@ def huerfanos(cx):
         "SELECT id, txt FROM afirmacion WHERE ref_id IS NULL OR insc_id IS NULL").fetchall()
 
 
+def afirmaciones_vigentes(cx):
+    """G-post: afirmaciones que siguen en pie (estatus 'afirmado'). Las superadas/
+    retractadas se conservan en la tabla pero NO son la vista por defecto."""
+    return cx.execute("SELECT id, txt FROM afirmacion WHERE estatus='afirmado'").fetchall()
+
+
+def revisiones_de(cx, af_id: str):
+    """Historial de reconsideracion de una afirmacion (append-only, auditado)."""
+    return cx.execute(
+        "SELECT nuevo_estatus, reemplazada_por, motivo, gatillo, ts FROM revision "
+        "WHERE target_af=? ORDER BY ts ASC", (af_id,)).fetchall()
+
+
 def load_bearing_inseguras(cx, store):
     """I2: afirmaciones afirmadas cuya version referida NO tiene snapshot en AEC."""
     rows = cx.execute(
@@ -112,8 +138,8 @@ def traza_ascendente(cx, af_id: str) -> dict:
     a = cx.execute("SELECT * FROM afirmacion WHERE id=?", (af_id,)).fetchone()
     if a is None:
         raise KeyError(af_id)
-    out = {"afirmacion": a["txt"], "inferencia": None, "version": None,
-           "consulta": None, "necesidad": None}
+    out = {"afirmacion": a["txt"], "estatus": a["estatus"], "inferencia": None,
+           "version": None, "consulta": None, "necesidad": None}
     if a["insc_id"]:
         i = cx.execute("SELECT * FROM inscripcion WHERE id=?", (a["insc_id"],)).fetchone()
         if i:
@@ -139,7 +165,7 @@ def dump_logico(cx) -> list:
     """Volcado canonico (filas ordenadas) para comparar reconstrucciones (falsador I1)."""
     out = []
     tablas = ["inscripcion", "necesidad", "consulta", "referente",
-              "version", "afirmacion", "referente_assert"]
+              "version", "afirmacion", "referente_assert", "revision"]
     for t in tablas:
         rows = cx.execute(f"SELECT * FROM {t}").fetchall()
         out.append((t, sorted(tuple(r) for r in rows)))

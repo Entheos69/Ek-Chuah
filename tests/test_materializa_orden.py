@@ -75,7 +75,7 @@ def _orden():
 class MaterializaOrden(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp()
-        self.store = AecStore(os.path.join(self.tmp, "AEC"))
+        self.store = AecStore(os.path.join(self.tmp, "AEC"), create=True)
         self.db = os.path.join(self.tmp, "graph_aec.db")
         self.clock = lambda: "2026-06-27T10:15:00"
 

@@ -32,6 +32,7 @@ import proyeccion
 
 ROOT_KEY = "ek_chuah_aec"
 SCHEMA_VERSION = "aec-1"
+REVISION_ESTATUS = ("superada", "retractada")   # C8: estatus validos de una revision (G-post)
 
 
 class IngestaError(Exception):
@@ -80,9 +81,17 @@ def _gatillo_ok(g) -> bool:
 
 # ---- lint de ingesta (C1-C7): falla limpio antes de tocar la BD ----
 
-def lint(doc, store) -> list:
-    """Devuelve la lista de errores BLOQUEANTES (vacia = limpio). store solo para C3
-    (has_snapshot, read-only). Espejo del lint de concept-sediment, dominio AEC."""
+def lint(doc, store=None) -> list:
+    """Devuelve la lista de errores BLOQUEANTES (vacia = limpio). Espejo del lint de
+    concept-sediment, dominio AEC.
+
+    Fuente UNICA de verdad del lint (emision e ingesta comparten esta funcion, nunca
+    dos copias que puedan diverger):
+      - store=None  -> LINT DE EMISION (aun no hay WORM): corre C1/C2/C4/C6. Omite C3
+        (has_snapshot) y C5 (capture_ts ISO) porque dependen de la materializacion,
+        que todavia no ocurrio (content_hash/capture_ts = MATERIALIZAR).
+      - store dado  -> LINT DE INGESTA completo: agrega C3 (roca en WORM, read-only)
+        y C5 (reloj sancionado)."""
     aec = doc.get(ROOT_KEY) if isinstance(doc, dict) else None
     if not isinstance(aec, dict):
         return [f"C1: falta la clave raiz '{ROOT_KEY}:'"]
@@ -102,13 +111,16 @@ def lint(doc, store) -> list:
         if not premisa or len(ins.get("busqueda") or []) == 0 or len(ins.get("resultados_crudos") or []) == 0:
             errs.append(f"C2: inscripcion[{lid or i}] sin tripleta (premisa/busqueda/resultados_crudos)")
 
-    # C3 (gate "nace confirmada") + C5 (capture_ts ISO), por referencia
+    # C3 (gate "nace confirmada") + C5 (capture_ts ISO), por referencia.
+    # Solo en fase de ingesta (store dado): en emision no hay WORM ni capture_ts real.
     ref_ids = set()
     for q in (aec.get("consultas") or []):
         for r in (q.get("referencias") or []):
             rlid = r.get("local_id")
             if rlid:
                 ref_ids.add(rlid)
+            if store is None:
+                continue   # fase emision: C3/C5 se difieren a la ingesta post-materializacion
             h = _norm_hash(r.get("content_hash"))
             if not h or not store.has_snapshot(h):
                 errs.append(f"C3: referencia[{rlid}] content_hash no resuelve en WORM "
@@ -133,6 +145,26 @@ def lint(doc, store) -> list:
             errs.append(f"C4: afirmacion survived_from '{sf}' no resuelve a una referencia presente")
         if ip not in insc_ids:
             errs.append(f"C4: afirmacion inferida_por '{ip}' no resuelve a una inscripcion presente")
+
+    # C8: revisiones (G-post) bien formadas. Estructural en ambas fases; la resolucion
+    # del target contra el log durable solo cuando hay store (fase ingesta).
+    log_af_ids = None
+    for rv in (aec.get("revisiones") or []):
+        tgt = rv.get("target_af")
+        ne = rv.get("nuevo_estatus")
+        if not tgt:
+            errs.append("C8: revision sin target_af (que afirmacion reconsidera)")
+        if ne not in REVISION_ESTATUS:
+            errs.append(f"C8: revision.nuevo_estatus '{ne}' invalido (validos: {REVISION_ESTATUS})")
+        if not _gatillo_ok(rv.get("gatillo")):
+            errs.append("C8: revision.gatillo debe matchear 'explicito:*' o 'implicito-de:*' (D2)")
+        if store is not None and tgt:
+            if log_af_ids is None:
+                log_af_ids = {ev["id"] for ev in store.iter_events()
+                              if ev.get("ev") == "afirmacion" and "id" in ev}
+            if tgt not in log_af_ids:
+                errs.append(f"C8: revision.target_af '{tgt[:16]}...' no resuelve a una "
+                            "afirmacion en el log (no se puede reconsiderar lo que no existe)")
     return errs
 
 
@@ -201,6 +233,15 @@ def derivar_eventos(doc, session_id: str = None) -> list:
         eventos.append((aid, {"ev": "afirmacion", "txt": a.get("txt"), "insc_id": insc,
                               "ref_id": ref, "tipo": a.get("tipo", "claim"),
                               "estatus": a.get("estatus", "afirmado")}))
+
+    # revisiones (G-post): reconsideracion append-only de una afirmacion durable previa.
+    # id determinista por (sid, target, nuevo_estatus) -> re-ingerir la misma revision = no-op.
+    for rv in (aec.get("revisiones") or []):
+        tgt, ne = rv.get("target_af"), rv.get("nuevo_estatus")
+        rid = _det_id(sid, "rev", tgt, ne)
+        eventos.append((rid, {"ev": "revision", "target_af": tgt, "nuevo_estatus": ne,
+                              "reemplazada_por": rv.get("reemplazada_por"),
+                              "motivo": rv.get("motivo"), "gatillo": rv.get("gatillo")}))
     return eventos
 
 
@@ -259,12 +300,33 @@ def _main(argv=None):
     ap.add_argument("--db", default=None,
                     help="ruta de la proyeccion graph_aec a reconstruir (default: no reconstruye)")
     ap.add_argument("--lint-only", action="store_true", help="solo lintea; no escribe nada")
+    ap.add_argument("--emision", action="store_true",
+                    help="lint de EMISION (sin WORM): corre C1/C2/C4/C6, omite C3/C5. "
+                         "Mismo linter que la ingesta; para que el Estratega valide antes de entregar.")
+    ap.add_argument("--init", action="store_true",
+                    help="bootstrap: crea el durable WORM si no existe (uso raro; por defecto falla ruidoso)")
+    ap.add_argument("--nube", action="store_true",
+                    help="B realineado: tras la ingesta local, empuja el delta a aec_log y lo "
+                         "proyecta a graph_aec en Railway (atomico, idempotente). Requiere "
+                         "DATABASE_URL. Un comando = visible en el lector al instante.")
     args = ap.parse_args(argv)
 
     from aec_store import AecStore
-    store = AecStore(args.aec)
     with open(args.yaml, "r", encoding="utf-8") as f:
         doc = yaml.safe_load(f)
+
+    # Fase EMISION: no hay WORM todavia -> store=None -> lint subset (C1/C2/C4/C6).
+    if args.emision:
+        errs = lint(doc, store=None)
+        if errs:
+            print("LINT EMISION FALLIDO:")
+            for e in errs:
+                print("  -", e)
+            return 1
+        print("LINT EMISION OK (C1/C2/C4/C6; C3/C5 se verifican tras materializar)")
+        return 0
+
+    store = AecStore(args.aec, create=args.init)
 
     if args.lint_only:
         errs = lint(doc, store)
@@ -288,6 +350,28 @@ def _main(argv=None):
         cx.close()
     print(f"INGESTA OK: appended={res['appended']} noop={res['noop']} "
           f"afirmaciones={len(res['afirmaciones'])} huerfanos={huerf}")
+
+    if args.nube:
+        db_url = os.environ.get("DATABASE_URL")
+        if not db_url:
+            print("NUBE OMITIDA: falta DATABASE_URL. La ingesta LOCAL quedo bien; "
+                  "corre 'python nube.py --aec", args.aec, "' cuando tengas la URL "
+                  "(idempotente, se auto-repara).")
+            return 1
+        import nube
+        try:
+            rn = nube.consolidar(args.aec, nube._connect_real(db_url))
+        except Exception as e:
+            print(f"NUBE FALLO ({type(e).__name__}: {e}). La ingesta LOCAL quedo bien; "
+                  "re-corre con --nube o 'python nube.py' (idempotente, se auto-repara).")
+            return 1
+        print(f"NUBE OK: nuevos={rn['nuevos']} afirmaciones_nuevas={rn['afirmaciones_nuevas']} "
+              f"embebidas={rn['embebidas']} -> visible en el lector")
+        if rn["sin_embedding"]:
+            print(f"  AVISO: {rn['sin_embedding']} sin embedding (busqueda ILIKE si las ve)")
+    elif os.environ.get("DATABASE_URL"):
+        print("HINT: DATABASE_URL presente; agrega --nube para que el grano sea visible "
+              "en el lector al instante (B realineado).")
     return 0
 
 
