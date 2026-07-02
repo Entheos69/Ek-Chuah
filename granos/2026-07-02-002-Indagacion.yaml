@@ -1,0 +1,83 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-07-02-002-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'Pregunta explicita del Guardian: con las direcciones de las paginas
+      web del cliente, indagar que sistema usan para su despliegue. Contexto: TRD
+      0.1.3 §1.1 (no-correlacion de infraestructura) y la decision FLUJO sobre frentes
+      publicos requieren saber donde viven hoy los sitios de las 3 marcas. Limitacion
+      declarada: desde la nube solo se lee contenido (huellas de stack en HTML); DNS/headers/certificados
+      exigen verificacion local (dig, curl -sI, crt.sh).
+
+      '
+    busqueda:
+    - etcs.com.mx
+    - systematip.com.mx
+    resultados_crudos:
+    - fuente: www.etcs.com.mx (home)
+      texto: No hay productos en la cesta
+    - fuente: systemati.com.mx (home, SYSTEMATI ex-SICOMPSA)
+      texto: Your address will show here +12 34 56 78 email@example.com
+    conclusion: 'ETCS corre WordPress+WooCommerce (carrito, copia por email/PDF):
+      perfil de hosting compartido tradicional, no PaaS; coherente con "DOMINIOS:
+      ISINGTEC" de Bases.md. El dominio declarado systematip.com.mx NO aflora en resultados;
+      el casi-homonimo systemati.com.mx existe con plantilla WordPress SIN TERMINAR
+      (placeholders del theme visibles). Hipotesis a verificar con el cliente: typo
+      en el levantamiento o dominio inactivo. Lectura global: los sitios actuales
+      del cliente NO estan en Railway ni en ningun PaaS moderno; la pregunta de plataforma
+      aplica al CRM nuevo, no a lo existente. La verificacion fina (CNAME, cert, headers)
+      queda como comando local del Guardian.
+
+      '
+    inferidor:
+      model: estratega/claude-fable-5
+      ts: '2026-07-02T16:05:00'
+  necesidad:
+    pregunta: '¿En que sistema de despliegue viven hoy los sitios publicos de las
+      tres marcas del cliente, y que implica para la no-correlacion (§1.1) y la decision
+      de frentes publicos en FLUJO?
+
+      '
+    gatillo: explicito:'Pregunta con las direcciones de sus paginas web puedes indagar
+      que sistema usan para su despliegue?'
+    origen_nodo: null
+  consultas:
+  - formulacion: etcs.com.mx
+    referencias:
+    - local_id: r1
+      url: https://www.etcs.com.mx/
+      content_hash: 3fb5a37f5b38cb795f1ee6a233ce4fb3916693175f6ff278d8f93ef264771cbe
+      capture_ts: '2026-07-02T16:40:00'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: systematip.com.mx
+    referencias:
+    - local_id: r2
+      url: https://systemati.com.mx/
+      content_hash: db7183e8c861cc932ab00395e187903ce01c706c5479d0b74ce7f4a7dece97bf
+      capture_ts: '2026-07-02T16:40:01'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: 'El sitio de ETCS es WordPress+WooCommerce en hosting tradicional (no PaaS);
+      la plataforma de despliegue del CRM es una decision nueva, sin arrastre de lo
+      existente.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: 'El dominio declarado de SystemaTip (systematip.com.mx) no tiene presencia
+      web verificable; existe systemati.com.mx con plantilla inconclusa. Requiere
+      verificacion con el cliente (typo vs dominio muerto) antes de cablear hostname->marca.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i1

@@ -1,0 +1,142 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-07-02-003-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'Orden del Guardian: re-evaluar Railway (plataforma actual de INDUCOP)
+      y llegar con al menos dos opciones viables de despliegue para el CRM multimarca
+      (Django 5.2 + PostgreSQL + workers django-q2 + 3 dominios custom con certificado
+      TLS individual por §1.1 del TRD). Evidencia: jun-jul 2026.
+
+      '
+    busqueda:
+    - Railway pricing plans 2026
+    - Render vs Fly.io Django production 2026
+    - Fly.io regions Querétaro Mexico qro
+    resultados_crudos:
+    - fuente: docs.railway.com/pricing/plans
+      texto: the Pro plan includes $20 of resource usage per month
+    - fuente: learndjango.com (Django Hosting Options 2026)
+      texto: it is no longer accepting new clients
+    - fuente: render.com/articles/should-i-use-render
+      texto: Railway has experienced repeated outages and intermittent reliability
+        issues
+    - fuente: render.com/articles/render-vs-fly-io
+      texto: high availability, automated failover, read replicas, and point-in-time
+        recovery
+    - fuente: fly.io/blog/the-region-consolidation-project
+      texto: Querétaro, Mexico (qro)
+    - fuente: fly.io (home)
+      texto: Deploy in 18 regions, from Sydney to São Paulo
+    conclusion: '(1) Heroku sale del tablero: desde feb-2026 en modo mantenimiento,
+      sin clientes nuevos; el ancla historica del PaaS murio. (2) Railway sigue viable:
+      modelo por consumo (Hobby $5 / Pro $20 por asiento + uso), hardware propio (Railway
+      Metal), DX que INDUCOP ya domina (costo de cambio cero). Señal amber: reporte
+      de inestabilidad reciente cuya fuente es Render (competidor directo) - sesgo
+      declarado, verificar contra status page antes de pesarlo. (3) Render = alternativa
+      #1: precio por instancia FIJO (costo operativo presupuestable para trasladar
+      al cliente), Postgres gestionado con HA/failover/replicas/ PITR, workers y cron
+      nativos, render.yaml IaC, SOC 2 Type II + ISO 27001 en plan Organization - el
+      argumento de compliance pesa para un cliente banca/farma. (4) Fly.io = alternativa
+      #2: control a nivel VM en hardware propio, certificados por dominio, Django
+      de primera clase; PERO consolido regiones a 18 y DEPRECO Queretaro y Guadalajara
+      - la ventaja de region-Mexico desaparecio; lo mas cercano es Dallas. Mas carga
+      de ops que Render. (5) Los tres cumplen §1.1 (cert individual por dominio custom);
+      la eleccion no altera TRD/FLUJO, solo costo operativo mensual y argumento de
+      compliance. Decision formal puede anclarse en BACKEND.
+
+      '
+    inferidor:
+      model: estratega/claude-fable-5
+      ts: '2026-07-02T16:12:00'
+  necesidad:
+    pregunta: '¿Sigue siendo Railway la plataforma correcta para el CRM multimarca,
+      y cuales son las dos alternativas viables con evidencia 2026 para llegar a la
+      decision de BACKEND con opciones reales?
+
+      '
+    gatillo: explicito:'Necesitamos re evaluar Railway, Inducop lo usa pero al menos
+      necesitamos llegar con otras dos opciones viables'
+    origen_nodo: null
+  consultas:
+  - formulacion: Railway pricing plans 2026
+    referencias:
+    - local_id: r1
+      url: https://docs.railway.com/pricing/plans
+      content_hash: 601547b05951787bd1eb569e0d5cbca895b6fd8b6083cf79355fe081c38f4452
+      capture_ts: '2026-07-02T16:43:57'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: Render vs Fly.io Django production 2026
+    referencias:
+    - local_id: r2
+      url: https://learndjango.com/tutorials/django-hosting-deployment-options
+      content_hash: bb83f1d4aa3c75de017ed19b523053c83d5a18c99d39be3bff8841b333beda2c
+      capture_ts: '2026-07-02T16:43:58'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r3
+      url: https://render.com/articles/should-i-use-render
+      content_hash: 187b3737e0a5e76c17eb72b7eee52b1de8dff95825550a77c2bd8b3a02a4447f
+      capture_ts: '2026-07-02T16:43:58'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r4
+      url: https://render.com/articles/render-vs-fly-io
+      content_hash: 653a88d297988405be6204ada3f02ca09720bef2cbba0a87387ff59b06552a37
+      capture_ts: '2026-07-02T16:43:59'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: Fly.io regions Querétaro Mexico qro
+    referencias:
+    - local_id: r5
+      url: https://fly.io/blog/the-region-consolidation-project/
+      content_hash: 093fe8950442be19d65bf470f3ffaa2651c38c2869111c40cb5f02d38826ea1a
+      capture_ts: '2026-07-02T16:43:59'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r6
+      url: https://fly.io/
+      content_hash: 2bd5e95c48d596794c9ddf7993b3054c907908814a116f4d894e8e90be02dc04
+      capture_ts: '2026-07-02T16:43:59'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: 'Heroku queda descartado como opcion: desde feb-2026 no acepta clientes nuevos
+      (modo mantenimiento).
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i1
+  - txt: 'Railway sigue viable como default (consumo Hobby $5/Pro $20+uso, DX dominado
+      por INDUCOP); la señal de inestabilidad reciente proviene de un competidor y
+      debe verificarse contra el status page antes de pesarla.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r3
+    inferida_por: i1
+  - txt: 'Render es la alternativa #1: precio fijo por instancia, Postgres gestionado
+      con HA/PITR, workers/cron nativos y SOC 2 + ISO 27001 (argumento de compliance
+      para cliente banca/farma).
+
+      '
+    tipo: decision
+    estatus: afirmado
+    survived_from: r4
+    inferida_por: i1
+  - txt: 'Fly.io es la alternativa #2 (control VM, certs por dominio, Django de primera
+      clase), pero deprecó las regiones de Mexico (qro/gdl) en su consolidacion a
+      18 regiones; lo mas cercano es Dallas.
+
+      '
+    tipo: decision
+    estatus: afirmado
+    survived_from: r5
+    inferida_por: i1

@@ -131,7 +131,8 @@ def _main(argv=None):
         print("PARCIAL: quedan refs en MATERIALIZAR. Corre 'python prevuelo.py "
               f"{res['out']}' para el diagnostico; reemplaza/quita las fuentes muertas y re-materializa.")
         return 1
-    print("siguiente: python ingesta.py", res["out"], "--aec", args.aec, "--db ek_chuah.db")
+    print("siguiente: python ingesta.py", res["out"], "--aec", args.aec,
+          "--db ek_chuah.db --nube   (B realineado: visible en el lector al instante)")
     return 0
 
 
