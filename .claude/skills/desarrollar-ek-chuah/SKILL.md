@@ -75,13 +75,23 @@ Caracterizacion de cada modulo para NO re-investigar. Formato: **rol** | API cla
 - **`demo_aec.py`** -- *demo end-to-end sobre AEC TEMPORAL* (nunca el durable real). Inscribe, reconstruye,
   muestra traza + version_actual + huerfanos=0 + falsador I1. Util como ejemplo ejecutable de la forma Q.
 
-### Pipeline de granos (los 4 pasos, detalle en la seccion Pipeline arriba)
+### Pipeline de granos (paso 0 nube + pasos 1-4 locales; detalle en la seccion Pipeline arriba)
 - **`prevuelo.py`** | `prevuelo(doc, probe=_probe_urllib)`, severidades BLOQUEANTE/AVISO/OK; `probe` inyectable.
   Baja el cuerpo COMPLETO al sondear (para cazar el host que sirve 200 y se cuelga). Read-only.
 - **`materializa_orden.py`** | `materializar_orden(doc,store,fetch=...)`, muta el doc in-place, resiliente
   por-ref (una URL muerta no tumba el grano; queda en `MATERIALIZAR`), `fetch` inyectable. Escribe snapshots.
-- **`ingesta.py`** | `derivar_eventos(doc)` (PURA, fuente unica de ids) -> `ingest_doc` (lint C1-C7 + gate C3 +
-  append). `lint(doc,store)` devuelve errores bloqueantes; `session_id_de`. CERO red. Idempotente (E1).
+- **`ingesta.py`** | `derivar_eventos(doc)` (PURA, fuente unica de ids) -> `ingest_doc` (lint C0-C8 + gate C3 +
+  append). `lint(doc,store)` devuelve errores bloqueantes (fase por `store`: None=emision, dado=ingesta);
+  `basename_ok(stem,doc)` = C0 identidad-doble (vive fuera de `lint` porque este no conoce el archivo);
+  `session_id_de`. En emision, C3/C5 exigen el placeholder `MATERIALIZAR` (membrana D2); C2 exige inferidor.
+  CERO red. Idempotente (E1).
+- **`aec_verify.py`** | Gate PRE-emision del Estratega (lado nube+navegador). NO reimplementa el lint:
+  DELEGA C0-C8 a `ingesta.lint`/`basename_ok` (importa el repo; degrada a solo-V* si no es importable).
+  Aporta lo unico imposible sin la fuente enfrente: **V1** verbatim (texto == substring literal de la captura
+  del DOM -> caza el anti-patron #1 "sintetizar en vez de citar"), **V2** extracto <15 palabras, **V3** captura
+  asociada. Avisos (no bloquean): coherencia consulta<->busqueda, reloj session_id vs inferidor.ts, derivados
+  declarados, offset D2. `verificar(ruta, capturas)`; `normalizar()` es de DISPLAY (no-id) HOY -- si un
+  `testigo_lectura.sha256` deriva de ella se vuelve load-bearing (congelar+compartir, como `nucleo._canon`).
 - **`consumido.py`** | `estado_doc/estado_grano/escanear_granos`, estados CONSUMIDO/NO-CONSUMIDO/PARCIAL/VACIO.
   Reusa `derivar_eventos` -> CONSUMIDO == ingesta seria no-op. CERO red/escritura; no exige rocas en WORM.
 - **`exporta_log.py`** | `export_log(log_path, sink)` con `MemorySink` (tests/--dry-run) o `PostgresSink`
