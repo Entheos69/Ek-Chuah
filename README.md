@@ -23,8 +23,9 @@ Greenfield. Solo stdlib. El **durable** vive FUERA de este repo, en `../AEC/`
 | `materializa.py` | Materializador programatico (snapshot a WORM + via en un paso; PoC/demo). |
 | `prevuelo.py` | Pre-flight del paso 2: sondea cada URL pendiente ANTES de materializar (read-only, no escribe WORM) y clasifica los huecos por severidad: ref inalcanzable que sostiene una afirmacion = BLOQUEANTE; si no la sostiene = AVISO. Localiza URLs muertas (DNS caido / host colgado / 404) de forma preventiva. |
 | `materializa_orden.py` | Paso 2 (materializacion del flujo orden): baja cada URL de una orden YAML-AEC a WORM y rellena `content_hash`+`capture_ts`. Aqui vive la red. Resiliente por-referencia: una URL muerta no aborta el grano ni pierde el progreso de las demas (la fallida queda en `MATERIALIZAR` y se reporta con su severidad). |
-| `ingesta.py` | Paso 3 (ingesta): YAML-AEC -> lint C1-C7 -> verifica hash en WORM (C3) -> puebla `graph_aec`. Idempotente, CERO red. |
+| `ingesta.py` | Paso 3 (ingesta): YAML-AEC -> lint C0-C8 -> verifica hash en WORM (C3) -> puebla `graph_aec`. Idempotente, CERO red. C0 (basename==session_id, via `basename_ok`) caza la identidad-doble; en emision, C3/C5 exigen el placeholder `MATERIALIZAR` (membrana D2). |
 | `exporta_log.py` | Borde local -> nube (camino B): empuja `log/inscripciones.jsonl` a la tabla `aec_log` del Postgres MCP-AEC. Idempotente por `line_sha` (ON CONFLICT DO NOTHING). Membrana: SOLO el log, nunca snapshots. |
+| `aec_verify.py` | Gate PRE-emision del Estratega (lado nube + navegador). Delega lo estructural (C0-C8) a `ingesta.lint`/`basename_ok` (una sola fuente de verdad, sin drift) y aporta lo unico imposible sin la fuente enfrente: **V1 verbatim** (cada `resultados_crudos[].texto` es substring LITERAL de la captura del DOM -> caza el anti-patron #1 "sintetizar en vez de citar"), **V2** extracto <15 palabras, **V3** captura asociada. No sustituye a la ingesta; corre antes y, si discrepan, gana el lint. |
 
 ## Dependencias
 
@@ -44,7 +45,10 @@ importado PEREZOSO: los tests y `--dry-run` corren sin red ni driver.
 - **E1** -- ingesta idempotente: re-ingerir el mismo YAML-AEC = no-op completo (el log no crece).
 - **WORM** -- snapshot idempotente; no hay `update` ni `delete`.
 - Invariante de la tripleta; deteccion de huerfanos; normalizacion conservadora de URL;
-  rechazos de lint C1/C2/C4/C5/C6.
+  rechazos de lint C0/C1/C2/C4/C5/C6 (C0 identidad-doble, C2 exige inferidor, C3/C5-emision
+  exigen el placeholder MATERIALIZAR).
+- **VERBATIM** (`tests/test_aec_verify.py`) -- el gate pre-emision caza la sintesis (V1: el
+  extracto debe ser substring literal de la captura) y delega lo estructural a la ingesta.
 
 ## Correr
 
@@ -61,6 +65,10 @@ reusar el nombre). El durable WORM (`../AEC`) y la proyeccion (`*.db`) NO son gr
 El grano llega como ORDEN con `content_hash`/`capture_ts` = `MATERIALIZAR`. Dos pasos,
 **in-place** (el mismo archivo evoluciona orden -> materializado -> ingerido):
 
+    # paso 0 (opcional, lado nube): gate PRE-emision del Estratega, con la fuente enfrente.
+    #   Verbatim contra la captura del DOM (V1) + delega C0-C8 a la ingesta. APTO/RETENIDO.
+    python aec_verify.py granos/2026-06-27-001-Indagacion.yaml captura_r1.txt
+
     # paso 1 (preventivo): sondea las URLs ANTES de bajar nada; localiza huecos por severidad
     python prevuelo.py granos/2026-06-27-001-Indagacion.yaml
     #   BLOQUEANTE (ref load-bearing muerta) -> reemplaza la fuente por una roca viva equivalente
@@ -69,7 +77,7 @@ El grano llega como ORDEN con `content_hash`/`capture_ts` = `MATERIALIZAR`. Dos 
     # paso 2: baja la roca de cada URL a WORM y rellena los placeholders (RED; sancion del actor local)
     python materializa_orden.py granos/2026-06-27-001-Indagacion.yaml --aec ../AEC --consolidado-por "Guardian"
 
-    # paso 3: lint C1-C7 + verifica hash en WORM -> puebla graph_aec (CERO red, idempotente)
+    # paso 3: lint C0-C8 + verifica hash en WORM -> puebla graph_aec (CERO red, idempotente)
     python ingesta.py granos/2026-06-27-001-Indagacion.yaml --aec ../AEC --db ek_chuah.db
 
     # solo validar sin escribir nada (falla en C3/C5 hasta materializar):

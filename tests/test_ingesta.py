@@ -188,6 +188,44 @@ class Ingesta(unittest.TestCase):
         with self.assertRaises(IngestaError):
             ingest_doc(doc, self.store)
 
+    # ---- C0: identidad-doble -- basename != session_id (error del 2026-07-18) ----
+    def test_C0_basename_identidad_doble(self):
+        from ingesta import basename_ok
+        doc = _doc("MATERIALIZAR")
+        sid = doc["ek_chuah_aec"]["meta"]["session_id"]
+        self.assertEqual(basename_ok(sid, doc), [], "el nombre correcto no debe fallar C0")
+        errs = basename_ok("otro-nombre", doc)
+        self.assertTrue(errs and errs[0].startswith("C0"), "basename distinto debe fallar C0")
+        # y por el borde de archivo: ingest() rechaza el grano mal nombrado
+        h = self._materializar()
+        path = os.path.join(self.tmp, "nombre-que-no-es-el-session-id.yaml")
+        with open(path, "w", encoding="utf-8") as f:
+            import yaml
+            yaml.safe_dump(_doc(h), f, allow_unicode=True)
+        with self.assertRaises(IngestaError):
+            ingesta.ingest(path, self.store)
+        self.assertEqual(self._n_eventos(), 0, "C0 fallo pero appendeo (no fallo limpio)")
+
+    # ---- C2: la roca debe decir quien la leyo (inferidor model + ts) ----
+    def test_C2_exige_inferidor(self):
+        doc = _doc("MATERIALIZAR")
+        doc["ek_chuah_aec"]["consultas"][0]["referencias"][0]["capture_ts"] = "MATERIALIZAR"
+        del doc["ek_chuah_aec"]["inscripciones"][0]["inferidor"]
+        errs = lint(doc, store=None)
+        self.assertTrue(any(e.startswith("C2") and "inferidor" in e for e in errs),
+                        "una inscripcion sin inferidor no debe pasar el lint")
+
+    # ---- C3/C5 emision: en emision el plano fisico debe ser el placeholder MATERIALIZAR ----
+    def test_emision_exige_placeholder_materializar(self):
+        # hash/ts REALES en emision = el emisor cruzo la membrana D2 -> C3/C5
+        real = lint(_doc(content_hash(SNAP)), store=None)
+        self.assertTrue(any(e.startswith("C3") for e in real), "hash real en emision debe fallar C3")
+        self.assertTrue(any(e.startswith("C5") for e in real), "capture_ts real en emision debe fallar C5")
+        # placeholders correctos = limpio
+        doc = _doc("MATERIALIZAR")
+        doc["ek_chuah_aec"]["consultas"][0]["referencias"][0]["capture_ts"] = "MATERIALIZAR"
+        self.assertEqual(lint(doc, store=None), [], "los placeholders MATERIALIZAR no deben fallar")
+
     # ---- E: lint de EMISION (store=None) omite C3/C5 pero conserva C1/C2/C4/C6 ----
     def test_emision_lint_omite_C3_C5(self):
         """El grano pre-materializado (placeholders) PASA el lint de emision aunque
@@ -223,7 +261,8 @@ class Ingesta(unittest.TestCase):
     def test_ingest_desde_archivo(self):
         import yaml
         h = self._materializar()
-        path = os.path.join(self.tmp, "grano.yaml")
+        # C0: el archivo DEBE nombrarse como el session_id (identidad-doble = rechazo).
+        path = os.path.join(self.tmp, "2026-06-27-001-Indagacion.yaml")
         with open(path, "w", encoding="utf-8") as f:
             yaml.safe_dump(_doc(h), f, allow_unicode=True)
         res = ingesta.ingest(path, self.store, self.db)

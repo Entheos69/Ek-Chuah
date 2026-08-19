@@ -87,11 +87,14 @@ def lint(doc, store=None) -> list:
 
     Fuente UNICA de verdad del lint (emision e ingesta comparten esta funcion, nunca
     dos copias que puedan diverger):
-      - store=None  -> LINT DE EMISION (aun no hay WORM): corre C1/C2/C4/C6. Omite C3
-        (has_snapshot) y C5 (capture_ts ISO) porque dependen de la materializacion,
-        que todavia no ocurrio (content_hash/capture_ts = MATERIALIZAR).
-      - store dado  -> LINT DE INGESTA completo: agrega C3 (roca en WORM, read-only)
-        y C5 (reloj sancionado)."""
+      - store=None  -> LINT DE EMISION (aun no hay WORM): corre C1/C2/C4/C6 y EXIGE que
+        content_hash/capture_ts sean el placeholder 'MATERIALIZAR' (C3/C5 en su forma de
+        emision: el plano fisico no es del emisor, membrana D2). Difiere la verificacion
+        de que la roca resuelva en WORM y el reloj sea sancionado a la fase de ingesta.
+      - store dado  -> LINT DE INGESTA completo: C3 (roca en WORM, read-only) y C5
+        (reloj sancionado) sobre el content_hash/capture_ts ya reales.
+    C0 (basename==session_id) no vive aqui: `lint` es puro-sobre-doc y no conoce el
+    archivo; lo aplica `basename_ok` en el borde donde el path existe (CLI, ingest())."""
     aec = doc.get(ROOT_KEY) if isinstance(doc, dict) else None
     if not isinstance(aec, dict):
         return [f"C1: falta la clave raiz '{ROOT_KEY}:'"]
@@ -110,6 +113,12 @@ def lint(doc, store=None) -> list:
         premisa = (ins.get("premisa") or "").strip()
         if not premisa or len(ins.get("busqueda") or []) == 0 or len(ins.get("resultados_crudos") or []) == 0:
             errs.append(f"C2: inscripcion[{lid or i}] sin tripleta (premisa/busqueda/resultados_crudos)")
+        # La roca debe decir QUIEN la leyo: una inferencia es lectura fechada y firmada,
+        # no un hecho anonimo (nucleo.Inferidor). derivar_eventos ya persiste model+ts;
+        # el lint lo exige para que no entre una inscripcion sin procedencia de lectura.
+        inf = ins.get("inferidor") or {}
+        if not (inf.get("model") or "").strip() or not str(inf.get("ts") or "").strip():
+            errs.append(f"C2: inscripcion[{lid or i}] sin inferidor (model + ts): la roca no dice quien la leyo")
 
     # C3 (gate "nace confirmada") + C5 (capture_ts ISO), por referencia.
     # Solo en fase de ingesta (store dado): en emision no hay WORM ni capture_ts real.
@@ -120,7 +129,17 @@ def lint(doc, store=None) -> list:
             if rlid:
                 ref_ids.add(rlid)
             if store is None:
-                continue   # fase emision: C3/C5 se difieren a la ingesta post-materializacion
+                # Fase EMISION: el plano fisico aun no existe. C3/C5 (roca en WORM, reloj
+                # sancionado) se difieren a la ingesta post-materializacion, PERO el
+                # content_hash/capture_ts deben ser el placeholder 'MATERIALIZAR'. Un hash
+                # o un ts real aqui = el Estratega cruzo la membrana D2 (fabricar procedencia
+                # del plano fisico, que no es suyo): se rechaza en la fase donde nace el error.
+                for campo, code in (("content_hash", "C3"), ("capture_ts", "C5")):
+                    val = r.get(campo)
+                    if val != "MATERIALIZAR":
+                        errs.append(f"{code}: referencia[{rlid}] {campo}={val!r} en emision debe ser "
+                                    f"'MATERIALIZAR' (el plano fisico no es del emisor, D2)")
+                continue
             h = _norm_hash(r.get("content_hash"))
             if not h or not store.has_snapshot(h):
                 errs.append(f"C3: referencia[{rlid}] content_hash no resuelve en WORM "
@@ -174,6 +193,21 @@ def session_id_de(doc, session_id: str = None) -> str:
     """El session_id efectivo del grano (arg explicito > meta.session_id > '')."""
     meta = (doc.get(ROOT_KEY) or {}).get("meta") or {} if isinstance(doc, dict) else {}
     return session_id or meta.get("session_id") or ""
+
+
+def basename_ok(stem: str, doc) -> list:
+    """C0: el nombre del contenedor DEBE ser la identidad que declara (session_id).
+
+    Falla en identidad-doble: un grano llamado 'X.yaml' cuyo meta.session_id dice 'Y'
+    parte el grafo en dos identidades para una sola indagacion. Es el error que el
+    Guardian cazo a mano el 2026-07-18 y que motivo el changelog v2 del skill; aqui lo
+    caza el codigo. Browser-independiente: solo compara nombre vs contenido, por eso
+    corre en local (CLI) y la comparte el gate de emision del Estratega (aec_verify)
+    -> una sola definicion de C0. `stem` es el basename sin extension."""
+    sid = session_id_de(doc)
+    if stem != sid:
+        return [f"C0: basename '{stem}' != meta.session_id '{sid}' (identidad doble del grano)"]
+    return []
 
 
 def derivar_eventos(doc, session_id: str = None) -> list:
@@ -279,6 +313,9 @@ def ingest(yaml_path: str, store, db_path: str = None) -> dict:
     """Ingiere un YAML-AEC desde archivo. Si db_path, reconstruye la proyeccion y reporta huerfanos."""
     with open(yaml_path, "r", encoding="utf-8") as f:
         doc = yaml.safe_load(f)
+    b_errs = basename_ok(os.path.splitext(os.path.basename(yaml_path))[0], doc)
+    if b_errs:
+        raise IngestaError("lint fallido: " + "; ".join(b_errs))
     res = ingest_doc(doc, store)
     if db_path:
         cx = proyeccion.reconstruir(store, db_path)
@@ -315,21 +352,25 @@ def _main(argv=None):
     with open(args.yaml, "r", encoding="utf-8") as f:
         doc = yaml.safe_load(f)
 
-    # Fase EMISION: no hay WORM todavia -> store=None -> lint subset (C1/C2/C4/C6).
+    # C0 (identidad-doble): el nombre del archivo debe ser el session_id. Se antepone a
+    # todas las fases porque un grano mal nombrado esta roto antes de cualquier otro check.
+    b_errs = basename_ok(os.path.splitext(os.path.basename(args.yaml))[0], doc)
+
+    # Fase EMISION: no hay WORM todavia -> store=None -> lint subset (C0/C1/C2/C4/C6).
     if args.emision:
-        errs = lint(doc, store=None)
+        errs = b_errs + lint(doc, store=None)
         if errs:
             print("LINT EMISION FALLIDO:")
             for e in errs:
                 print("  -", e)
             return 1
-        print("LINT EMISION OK (C1/C2/C4/C6; C3/C5 se verifican tras materializar)")
+        print("LINT EMISION OK (C0/C1/C2/C4/C6; C3/C5 se verifican tras materializar)")
         return 0
 
     store = AecStore(args.aec, create=args.init)
 
     if args.lint_only:
-        errs = lint(doc, store)
+        errs = b_errs + lint(doc, store)
         if errs:
             print("LINT FALLIDO:")
             for e in errs:
@@ -338,6 +379,9 @@ def _main(argv=None):
         print("LINT OK")
         return 0
 
+    if b_errs:
+        print("INGESTA RECHAZADA: lint fallido:", "; ".join(b_errs))
+        return 1
     try:
         res = ingest_doc(doc, store)
     except IngestaError as e:
