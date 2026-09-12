@@ -1,0 +1,145 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-09-12-001-Indagacion
+    consolidado_por: Guardian
+    project: inducop
+  inscripciones:
+  - local_id: i1
+    premisa: 'El Guardian pidio (S219, 2026-09-12) que la landing publica de Limpiadores
+      nombre a la sosa caustica (hidroxido de sodio) como la solucion "a ras de piso"
+      mas popular por barata y efectiva, que a menudo pretende elevarse a nivel industrial,
+      y que el copy diga que problemas trae. Antes de publicar una afirmacion nueva
+      en el escaparate hace falta roca.
+
+      '
+    busqueda:
+    - hidroxido de sodio sosa caustica limpieza industrial desventajas corrosion aluminio
+      saponificacion riesgos manejo
+    resultados_crudos:
+    - fuente: smantenimiento.us.es/uma/-hidroxido_de_sodio_sosa_caustica_usos_peligrosidad_y_propiedades.php
+      texto: al contacto con la piel no produce dolor inmediato —la destrucción de
+        terminaciones nerviosas ocurre antes que la sensación de quemadura
+    - fuente: smantenimiento.us.es/uma/-hidroxido_de_sodio_sosa_caustica_usos_peligrosidad_y_propiedades.php
+      texto: la reacción hidróxido de sodio aluminio libera hidrógeno gaseoso y calor
+        —una combinación peligrosa si ocurre en un recipiente cerrado
+    - fuente: smantenimiento.us.es/uma/-hidroxido_de_sodio_sosa_caustica_usos_peligrosidad_y_propiedades.php
+      texto: una disolución altamente exotérmica en agua (¡nunca echar agua sobre
+        NaOH sólido!)
+    - fuente: smantenimiento.us.es/uma/-hidroxido_de_sodio_sosa_caustica_usos_peligrosidad_y_propiedades.php
+      texto: es la base de su uso en desatascadores, en la fabricación de biodiésel
+        o en la limpieza de equipos grasos en talleres universitarios
+    - fuente: cienxcieninox.com.ar/soda-caustica-arruina-las-inoxidable/
+      texto: Esta reacción puede corroer gravemente el metal, dañando la superficie
+        de forma permanente y liberando gases potencialmente peligrosos, como el hidrógeno.
+    conclusion: 'Verificado por fetch directo: la sosa caustica es limpiador de grasa
+      de uso corriente (saponifica), ataca el aluminio liberando hidrogeno y calor,
+      quema la piel sin dolor inmediato y su disolucion en agua es fuertemente exotermica.
+      Eso sostiene el parrafo nuevo de Limpiadores §2. Lo que NO tiene roca (dos fuentes
+      del resumen del buscador devolvieron HTTP 403 al fetch: amoquimicos.com, y no
+      se inscribe): "ataca zinc y varios plasticos" -- se retiro del copy.
+
+      '
+    inferidor:
+      model: code/claude-fable-5-1
+      ts: '2026-09-12T13:24:00-06:00'
+  - local_id: i2
+    premisa: 'El Guardian pidio anadir "lavado en seco en industria alimenticia y
+      medicinas" a la lista de trabajos donde el catalogo de limpiadores rinde (proceso
+      normalizado y verificable). Hace falta roca de que la limpieza en seco es practica
+      de la industria de alimentos y por que se prefiere al agua.
+
+      '
+    busqueda:
+    - limpieza en seco industria alimentaria farmaceutica dry cleaning higiene sin
+      agua validacion limpieza
+    resultados_crudos:
+    - fuente: pmc.ncbi.nlm.nih.gov/articles/PMC13188896/
+      texto: Food soils that are moistened but not removed by wet cleaning enhance
+        food safety risk as they both shield pathogens from chemical sanitizers and
+        are a nutrient-rich, high-moisture matrix conducive to microbial growth
+    - fuente: pmc.ncbi.nlm.nih.gov/articles/PMC13188896/
+      texto: the FDA recommends that water use during sanitation should be minimized
+        and that surfaces should be dried promptly to prevent microbial growth
+    - fuente: pmc.ncbi.nlm.nih.gov/articles/PMC13188896/
+      texto: One of the few instances in which water is intentionally introduced into
+        LMF facilities is during wet sanitation conducted to mitigate allergen cross-contact
+        and the cross-contamination risks
+    conclusion: 'Re-emision 2026-09-12: la roca original (ecolab.com) quedo inalcanzable
+      desde el sandbox (403 WAF); sustituida por una roca viva equivalente y canonica:
+      articulo revisado por pares (Applied and Environmental Microbiology, via PMC/NCBI).
+      Verificado por fetch directo: en instalaciones de alimentos de baja humedad
+      (LMF) el agua que introduce la sanitizacion humeda crea una matriz propicia
+      al crecimiento microbiano; la FDA recomienda minimizar el agua y secar pronto
+      (de ahi la limpieza en seco); el agua solo se introduce a proposito para mitigar
+      el contacto cruzado de alergenos. Alimentos SI; farmaceutica NO esta en esta
+      roca (testimonio del Guardian).
+
+      '
+    inferidor:
+      model: code/claude-fable-5-1
+      ts: '2026-09-12T13:24:00-06:00'
+  necesidad:
+    pregunta: 'Que respaldo documentado tiene el copy nuevo de la landing publica
+      de Limpiadores (S219): la sosa caustica como solucion de piso barata y efectiva
+      con dano colateral (aluminio, piel, disolucion exotermica), y la limpieza en
+      seco como practica de la industria de alimentos donde el proceso debe ser el
+      mismo y verificable.'
+    gatillo: explicito:'Buscar una referencia y ejemplo de la sosa caustica... buscalo'
+      + 'crea los granos correspondientes' (Guardian, 2026-09-12, S219)
+    origen_nodo: null
+  consultas:
+  - formulacion: hidroxido de sodio sosa caustica limpieza industrial desventajas
+      corrosion aluminio saponificacion riesgos manejo
+    referencias:
+    - local_id: r1
+      url: https://smantenimiento.us.es/uma/-hidroxido_de_sodio_sosa_caustica_usos_peligrosidad_y_propiedades.php
+      content_hash: 3d60e63d248475bd1d065533e780accb719cb0bf72e9c5461a02934f1659810a
+      capture_ts: '2026-09-12T14:49:16'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r2
+      url: https://cienxcieninox.com.ar/soda-caustica-arruina-las-inoxidable/
+      content_hash: d25b72c055576e4d8682e6338360b45f40b03733aea34715e8c7d8844be24836
+      capture_ts: '2026-09-12T14:49:17'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: limpieza en seco industria alimentaria farmaceutica dry cleaning
+      higiene sin agua validacion limpieza
+    referencias:
+    - local_id: r3
+      url: https://pmc.ncbi.nlm.nih.gov/articles/PMC13188896/
+      content_hash: f0bdf7e21190eec6f89217e31198f38f04003d37bc05c8f19b79a900af4b1e8e
+      capture_ts: '2026-09-12T14:49:17'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: 'El hidroxido de sodio (sosa caustica) es limpiador de grasa de uso corriente
+      por saponificacion, y su contacto con la piel no produce dolor inmediato: destruye
+      terminaciones nerviosas antes de que se sienta la quemadura.'
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: La reaccion del hidroxido de sodio con aluminio libera hidrogeno gaseoso
+      y calor; la disolucion de NaOH en agua es fuertemente exotermica (nunca agua
+      sobre NaOH solido).
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: La sosa caustica puede corroer gravemente el metal (aluminio) danando la
+      superficie de forma permanente y liberando hidrogeno; para otros metales como
+      el acero inoxidable la compatibilidad debe verificarse caso por caso.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i1
+  - txt: En plantas de alimentos de proceso seco la limpieza en seco se prefiere porque
+      el agua introduce crecimiento microbiano y contaminacion; forma parte de programas
+      de inocuidad, calidad y manejo de alergenos validados. (Alimentos SI; farmaceutica
+      NO esta en esta roca.)
+    tipo: claim
+    estatus: afirmado
+    survived_from: r3
+    inferida_por: i2
