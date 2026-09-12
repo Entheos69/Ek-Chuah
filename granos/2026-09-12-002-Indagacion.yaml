@@ -1,0 +1,113 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-09-12-002-Indagacion
+    consolidado_por: Guardian
+    project: inducop
+  inscripciones:
+  - local_id: i1
+    premisa: 'El Guardian declaro (S219, 2026-09-12) que una reaccion lleva aceleradores,
+      catalizadores, aditivos, modificadores de superficie, antiflama, protectores
+      UV, pigmentos, etc., que no todos funcionan en todos lados y que elegir el adecuado
+      para una reaccion en particular tambien es optimizar; pidio formalizar la terminologia
+      porque no tiene el bagaje. Hace falta la nomenclatura formal de la industria
+      de aditivos para polimeros y roca de que la eleccion depende del sistema.
+
+      '
+    busqueda:
+    - aditivos para polimeros clasificacion aceleradores catalizadores retardantes
+      de llama estabilizadores UV HALS pigmentos agentes de acoplamiento modificadores
+      de superficie
+    resultados_crudos:
+    - fuente: es.wikipedia.org/wiki/Aditivos_para_plástico
+      texto: 'Retardantes a la llama: Se utilizan para reducir la inflamabilidad de
+        un material o para demorar la propagación de las llamas'
+    - fuente: es.wikipedia.org/wiki/Aditivos_para_plástico
+      texto: 'Estabilizantes (antioxidantes): Ayudan a inhibir o retardar el mecanismo
+        de oxidación - degradación de los polímeros'
+    - fuente: es.wikipedia.org/wiki/Aditivos_para_plástico
+      texto: 'Plastificantes: Se añaden a un polímero para mejorar su procesabilidad
+        y su flexibilidad'
+    - fuente: es.wikipedia.org/wiki/Aditivos_para_plástico
+      texto: 'Absorbedores de luz UV: Se emplean en productos plásticos cuando se
+        desea incrementar su vida útil'
+    - fuente: pt-mexico.com/articulos/aditivos-para-plasticos-tipos-propiedades-y-aplicaciones
+      texto: '[la pagina enumera] estabilizadores termicos/antioxidantes, estabilizadores
+        UV/HALS, retardantes de llama, pigmentos/colorantes, auxiliares de procesamiento'
+    - fuente: mexpolimeros.com/aceleradores-para-cauchos.html
+      texto: un acelerador es un material que, cuando se mezcla con un catalizador
+        o una resina, acelera la reacción química
+    - fuente: mexpolimeros.com/aceleradores-para-cauchos.html
+      texto: La selección de un acelerador dependerá del sistema de vulcanización
+        específico y de las propiedades de curado
+    conclusion: 'Nomenclatura formal verificada por fetch directo: retardantes de
+      llama, estabilizantes / antioxidantes, absorbedores de luz UV (y HALS), plastificantes,
+      pigmentos y colorantes, auxiliares de procesamiento, aceleradores (que reducen
+      tiempo y temperatura de curado y se eligen segun el sistema de curado). Eso
+      sostiene la seccion nueva "Elegir el aditivo tambien es optimizar" de la landing
+      de Optimizacion de procesos. "Agentes de acoplamiento (silanos/titanatos)" aparecia
+      solo en el resumen del buscador (BASF devolvio 403; Wikipedia no los lista):
+      se RETIRO del copy; "promotores de adherencia" queda anclado en granos previos
+      (flameado + promotor, 2026-08-01). "Modificadores de superficie" es termino
+      del Guardian (testimonio), no de esta roca.
+
+      '
+    inferidor:
+      model: code/claude-fable-5-1
+      ts: '2026-09-12T13:24:00-06:00'
+  necesidad:
+    pregunta: Cual es la nomenclatura formal de los aditivos de una reaccion/formulacion
+      polimerica (aceleradores, catalizadores, retardantes de llama, estabilizadores
+      UV/termicos, pigmentos, cargas, plastificantes, promotores de adherencia) y
+      que roca sostiene que su eleccion depende del sistema, para formalizar la seccion
+      de aditivos de la landing publica de Optimizacion de procesos industriales (S219).
+    gatillo: explicito:'necesito que uses estas palabras y las formalices yo no tengo
+      el bagaje, buscalo' + 'crea los granos correspondientes' (Guardian, 2026-09-12,
+      S219)
+    origen_nodo: null
+  consultas:
+  - formulacion: aditivos para polimeros clasificacion aceleradores catalizadores
+      retardantes de llama estabilizadores UV HALS pigmentos agentes de acoplamiento
+      modificadores de superficie
+    referencias:
+    - local_id: r1
+      url: https://es.wikipedia.org/wiki/Aditivos_para_pl%C3%A1stico
+      content_hash: cd2be9df7de41f387db28f05499db1c67bfeed53c2d0615a46885e172da88695
+      capture_ts: '2026-09-12T13:38:47'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r2
+      url: https://www.pt-mexico.com/articulos/aditivos-para-plasticos-tipos-propiedades-y-aplicaciones
+      content_hash: bf8c5f0ec195f74e3cd07e7cfe84f555fa5c53840bf4a460301efc223c5e8461
+      capture_ts: '2026-09-12T13:38:48'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r3
+      url: https://www.mexpolimeros.com/aceleradores-para-cauchos.html
+      content_hash: 96f5e4a046acc47cc888efe9946bff323db9b6f71bbea34c9eb5220693da1647
+      capture_ts: '2026-09-12T13:38:49'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: Los aditivos para polimeros incluyen retardantes a la llama (reducen la inflamabilidad
+      o demoran la propagacion), estabilizantes/antioxidantes (inhiben la oxidacion-degradacion),
+      plastificantes (mejoran procesabilidad y flexibilidad) y absorbedores de luz
+      UV (incrementan la vida util).
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: La industria clasifica ademas estabilizadores UV/HALS, pigmentos y colorantes,
+      y auxiliares de procesamiento como familias de aditivos para plasticos.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i1
+  - txt: 'Un acelerador acelera la reaccion quimica de curado (reduce tiempo y temperatura)
+      y su seleccion depende del sistema de curado/vulcanizacion especifico y de las
+      propiedades de curado buscadas: no sirve el mismo acelerador para todos los
+      sistemas.'
+    tipo: claim
+    estatus: afirmado
+    survived_from: r3
+    inferida_por: i1

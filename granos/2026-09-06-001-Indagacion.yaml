@@ -1,0 +1,184 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-09-06-001-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'Para redisenar la vista publica de INDUCOP de un catalogo de productos
+      a 6 areas de negocio heterogeneas (producto + servicios + financiera) hace falta
+      el patron de estructura de sitio que el mercado usa para grupos con oferta compleja/multiples
+      lineas.
+
+      '
+    busqueda:
+    - B2B website navigation structure multiple divisions hub-and-spoke customer intent
+    resultados_crudos:
+    - fuente: trajectorywebdesign.com/blog/b2b-website-navigation
+      texto: The hub-and-spoke model creates a central landing page for each major
+        topic, with related pages branching off from that hub.
+    - fuente: trajectorywebdesign.com/blog/b2b-website-navigation
+      texto: One of the most damaging navigation mistakes is organizing your site
+        based on how your company is structured rather than how customers think.
+    - fuente: trajectorywebdesign.com/blog/b2b-website-navigation
+      texto: 'Industry-based navigation excels when your offerings vary significantly
+        by sector. [hibrido: main navigation solution-based + secondary ''Industries''
+        menu]'
+    - fuente: trajectorywebdesign.com/blog/b2b-website-navigation
+      texto: Progressive disclosure helps manage complexity on small screens. Start
+        with main categories, then reveal subcategories as needed.
+    conclusion: 'El patron canonico para sitios B2B con multiples lineas es hub-and-spoke
+      (landing central por tema + paginas que ramifican), organizado por intencion
+      del cliente (no por el organigrama interno), con navegacion por industria cuando
+      la oferta varia por sector y progressive disclosure en movil. Lectura verificada
+      por fetch directo de la pagina.
+
+      '
+    inferidor:
+      model: code/claude-opus-4-8
+      ts: '2026-09-06T13:41:00-06:00'
+  - local_id: i2
+    premisa: '4 de las 6 areas de INDUCOP no son un catalogo de productos (Financiera,
+      Automotriz, Diseno de software, y parte de Quimica), y el cliente ya tiene una
+      veta multi-marca (django-tenants, 3 dominios). Se necesita el patron para grupos
+      multi-marca/conglomerado.
+
+      '
+    busqueda:
+    - corporate website design multiple business units holding multi-brand design
+      system
+    resultados_crudos:
+    - fuente: uxpin.com/studio/blog/corporate-website-design-examples
+      texto: The Volkswagen Group presents multiple brands (Porsche, Audi, Lamborghini)
+        under a unified corporate umbrella. The site uses a consistent design language
+        while allowing each brand's personality to shine through.
+    - fuente: uxpin.com/studio/blog/corporate-website-design-examples
+      texto: multi-brand companies need a corporate design system flexible enough
+        to accommodate brand variations while maintaining structural consistency.
+    - fuente: uxpin.com/studio/blog/corporate-website-design-examples
+      texto: IBM's Carbon Design System ensures every page follows consistent patterns
+        [backbone of consistent corporate web design at scale].
+    - fuente: uxpin.com/studio/blog/corporate-website-design-examples
+      texto: Microsoft's site manages extraordinary content complexity with a clear
+        mega-menu navigation system and audience-segmented pathways.
+    - fuente: uxpin.com/studio/blog/corporate-website-design-examples
+      texto: corporate sites should lead with the corporate narrative (mission, values,
+        impact), with clear paths to subsidiary and product content.
+    conclusion: 'Para grupos multi-marca/conglomerado la practica es: liderar con
+      narrativa corporativa y dar rutas claras a subsidiarias/productos; audiencia-segmentada
+      via mega-menu; y un design system que acomode variacion de marca manteniendo
+      consistencia estructural (una estructura, N pieles). Esto legitima Opcion C
+      de INDUCOP (hub interno namespaced, migrable a multi-marca).
+
+      '
+    inferidor:
+      model: code/claude-opus-4-8
+      ts: '2026-09-06T13:41:00-06:00'
+  - local_id: i3
+    premisa: 'El resumen automatico de WebSearch atribuyo ejemplos concretos (Trane
+      hub-and-spoke, Fastenal navegacion por intencion) a la pagina DBS "8 great examples
+      of B2B web design". Antes de inscribirlos como afirmaciones hay que verificar
+      la roca (I2: no fabricar procedencia).
+
+      '
+    busqueda:
+    - diversified industrial group website business areas examples Trane Fastenal
+      DBS
+    resultados_crudos:
+    - fuente: dbswebsite.com/blog/8-great-examples-of-b2b-web-design
+      texto: 'Fetch directo: la pagina lista Dow, Asana, EOSYS, Zendesk, Xometry,
+        Kao Collins, ServiceNow, Lockheed Martin. NO menciona Trane Technologies,
+        Fastenal, hub-and-spoke ni estrategia multi-division.'
+    conclusion: 'Los ejemplos Trane/Fastenal fueron una mis-atribucion del resumen
+      del buscador: la pagina citada no los contiene. Afirmacion NEGATIVA util: los
+      summaries de buscador mis-atribuyen; anclar solo a fetch verificado. Trane/Fastenal
+      quedan sin roca -> NO se inscriben como afirmacion.
+
+      '
+    inferidor:
+      model: code/claude-opus-4-8
+      ts: '2026-09-06T13:41:00-06:00'
+  necesidad:
+    pregunta: Que estrategias de mercado usan los grupos/holdings diversificados para
+      estructurar su sitio publico cuando las lineas de negocio son heterogeneas (producto
+      + servicios + financiera), para informar el rediseno de la vista publica de
+      INDUCOP de catalogo a 6 areas de negocio.
+    gatillo: explicito:'Necesitamos investigar las estrategias comunes en el mercado'
+      + 'toda investigacion genera un grano AEC para que guardes referencias antes
+      de posible degradacion' (Guardian, 2026-09-06)
+    origen_nodo: null
+  consultas:
+  - formulacion: B2B website navigation structure multiple divisions hub-and-spoke
+      customer intent
+    referencias:
+    - local_id: r1
+      url: https://www.trajectorywebdesign.com/blog/b2b-website-navigation/
+      content_hash: 7bbf2599f23e3e57882a1d1013d5db484f435cdeee4f30855d0afe3bc577e1a1
+      capture_ts: '2026-09-12T13:38:45'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: corporate website design multiple business units holding multi-brand
+      design system
+    referencias:
+    - local_id: r2
+      url: https://www.uxpin.com/studio/blog/corporate-website-design-examples/
+      content_hash: fc521e9d2f446003b723636c15c618c96251e845561180145964e0c2d23dc61f
+      capture_ts: '2026-09-12T13:38:46'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: diversified industrial group website business areas examples Trane
+      Fastenal DBS
+    referencias:
+    - local_id: r3
+      url: https://www.dbswebsite.com/blog/8-great-examples-of-b2b-web-design/
+      content_hash: b25d044e710b5ec505487b663aa6483adc9603d2480a1629462b3c444d1c64dc
+      capture_ts: '2026-09-12T13:38:46'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: El patron hub-and-spoke (landing central por tema + paginas que ramifican)
+      es la recomendacion estandar para sitios B2B con oferta compleja o multiples
+      divisiones.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: La navegacion debe organizarse por como piensa/compra el cliente, no por
+      el organigrama interno; navegacion por industria cuando la oferta varia por
+      sector, con hibrido de menu de soluciones + secundario de industrias.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: Progressive disclosure en movil (categorias primero, subcategorias al expandir)
+      es la practica para manejar la complejidad de multiples lineas en pantallas
+      chicas.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: Para grupos multi-marca bajo un paraguas corporativo (ej. Volkswagen Group),
+      la practica es un design system que acomoda la variacion de marca manteniendo
+      consistencia estructural (ej. IBM Carbon Design System) -- una estructura, N
+      pieles.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i2
+  - txt: Los sitios de conglomerado deben liderar con la narrativa corporativa (mision/valores/impacto)
+      y dar rutas claras a contenido de subsidiarias y productos; complejidad alta
+      se maneja con mega-menu y rutas segmentadas por audiencia (ej. Microsoft).
+    tipo: claim
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i2
+  - txt: 'El resumen automatico del buscador atribuyo ejemplos de hub-and-spoke (Trane)
+      y navegacion por intencion (Fastenal) a la pagina DBS ''8 great examples of
+      B2B web design''; el fetch directo mostro que la pagina NO los contiene (lista
+      Dow, Asana, Zendesk, Lockheed, etc.). Los summaries de buscador mis-atribuyen:
+      anclar solo a fetch verificado.'
+    tipo: claim
+    estatus: afirmado
+    survived_from: r3
+    inferida_por: i3

@@ -1,0 +1,160 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-08-31-001-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'Hueco: mas alla de delimitadores en el prompt, cual es la frontera de
+      defensa anti-inyeccion (directa e indirecta) para agentes con herramientas tipo
+      Alex/Nora. Encuadre disparado por H9 de la auditoria S205 y por el frente F4
+      (sistema inmune v2).
+
+      '
+    busqueda:
+    - CaMeL FIDES Progent prompt injection defense capabilities information flow control
+      2026
+    - indirect prompt injection defense spotlighting delimiters best practices 2026
+    resultados_crudos:
+    - fuente: howardism.dev (Out-of-Band Prompt-Injection Defense, 2026-07-15)
+      texto: prompt injection is an authorization problem, not a content problem
+    - fuente: arXiv:2503.18813 (CaMeL, Debenedetti et al.)
+      texto: solving 77% of tasks with provable security
+    - fuente: arXiv:2606.26479 (LaunchSafe, out-of-band defenses survey)
+      texto: enforce security outside the model with a deterministic policy
+    conclusion: 'La primera generacion de defensas (clasificadores, guardarrailes,
+      fine-tuning adversarial) trato la inyeccion como problema de CONTENIDO y cae
+      ante ataques adaptativos. La segunda generacion (CaMeL, FIDES, Progent, RTBAS,
+      FORGE) la reencuadra como problema de AUTORIZACION y aplica la seguridad FUERA
+      del modelo via monitor de referencia determinista, con principios clasicos (Biba,
+      minimo privilegio, Saltzer-Schroeder). No es bala de plata: se valida en benchmarks
+      estaticos y una reproduccion adaptativa independiente dejo ~2.6% de ASR residual.
+      Los delimitadores/datamarking son refuerzo probabilistico, no la defensa.
+
+      '
+    inferidor:
+      model: fable/claude-opus-4-8
+      ts: '2026-08-31T13:12:15'
+  - local_id: i2
+    premisa: 'Hueco: el ecosistema MCP (superficie exogena que INDUCOP tambien opera)
+      tiene clases de vulnerabilidad y CVEs nombrados confirmados, distinguibles de
+      las cifras contestadas.
+
+      '
+    busqueda:
+    - MCP server security vulnerabilities GitHub repos SSRF tool poisoning 2026 unverified
+      claims
+    resultados_crudos:
+    - fuente: seclists.org Full Disclosure (2026-May-22)
+      texto: SSRF in Anthropic mcp-server-fetch and Microsoft playwright-mcp
+    - fuente: 'agent-wars.com (MCP Security 2026: 30 CVEs in 60 Days)'
+      texto: CVE-2025-6514 (mcp-remote, CVSS 9.6) affected 437,000+ downloads
+    - fuente: blog.cyberdesserts.com (AI Agent Security Risks 2026)
+      texto: CVE-2025-68143, CVE-2025-68144, CVE-2025-68145
+    conclusion: 'Nivel confirmado y nombrado (durable): CVE-2025-6514 (mcp-remote,
+      CVSS 9.6, 437k+ descargas); CVE-2025-68143/68144/68145 (Git MCP de Anthropic,
+      acceso a archivos + RCE via inyeccion); SSRF en mcp-server-fetch de Anthropic
+      y playwright-mcp de Microsoft (disclosure publico). Clases de ataque catalogadas:
+      tool poisoning (instruccion maliciosa en la descripcion de la herramienta),
+      SSRF, path traversal, rug pulls, cross-server. Las cifras porcentuales de prevalencia
+      (SSRF 36.7% vs 30%; path traversal 82%) quedan FUERA de este grano: son contestadas
+      y una auditoria reporto ~78% de falsos positivos en escaneres YARA -> NO durable.
+
+      '
+    inferidor:
+      model: fable/claude-opus-4-8
+      ts: '2026-08-31T13:12:15'
+  necesidad:
+    pregunta: 'Caracterizar la frontera EXOGENA de seguridad de IA agentica aplicable
+      a INDUCOP: (a) el estado del arte en defensa anti-inyeccion de prompt, y (b)
+      las clases y CVEs confirmados del ecosistema MCP. Insumo para F4 (sistema inmune
+      v2) e indice anti-re-investigacion para futuras indagaciones sobre el tema.
+
+      '
+    gatillo: explicito:'genera el grano ... Extra Inducop (lo existente aplicable
+      o caracterizador de Inducop)'
+    origen_nodo: null
+  consultas:
+  - formulacion: CaMeL FIDES Progent prompt injection defense capabilities information
+      flow control 2026
+    referencias:
+    - local_id: r1
+      url: https://arxiv.org/abs/2503.18813
+      content_hash: 873f10ca99e00f6e6978c381f07c41f7cbe88d1c76335eb9c20fbacf6661848b
+      capture_ts: '2026-09-12T13:38:42'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r2
+      url: https://arxiv.org/abs/2606.26479
+      content_hash: f82cd62a01c985035507bb7b14bdbc1e908d0a8ba75d050780ac55e8977ef75d
+      capture_ts: '2026-09-12T13:38:42'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r3
+      url: https://www.howardism.dev/articles/out-of-band-prompt-injection-defense
+      content_hash: f0bf3eb5f9d16b3b93990bbaa5f8101748417d7b0d3d42c2a1d8d75fa209fbf4
+      capture_ts: '2026-09-12T13:38:43'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: indirect prompt injection defense spotlighting delimiters best practices
+      2026
+    referencias:
+    - local_id: r4
+      url: https://arxiv.org/abs/2403.14720
+      content_hash: 5f0530309edf74c4bdf28f68f366149238b1d5453579d7a24f48ce84b8df250e
+      capture_ts: '2026-09-12T13:38:43'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: MCP server security vulnerabilities GitHub repos SSRF tool poisoning
+      2026 unverified claims
+    referencias:
+    - local_id: r5
+      url: https://seclists.org/fulldisclosure/2026/May/22
+      content_hash: c572db88a363967f02b520f4c184a7de7137eb3de7f9f264fa21b16db29708e8
+      capture_ts: '2026-09-12T13:38:43'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r6
+      url: https://agent-wars.com/news/2026-03-13-mcp-security-2026-30-cves-in-60-days-what-went-wrong
+      content_hash: 6fca0dd6afa699a347589ed1e4f33c0c05d8b06d3ef30fbffc807b71805f49ca
+      capture_ts: '2026-09-12T13:38:45'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: 'La frontera de defensa anti-inyeccion de prompt reencuadra el problema como
+      AUTORIZACION, no contenido, y aplica la seguridad fuera del modelo mediante
+      monitor de referencia determinista (CaMeL, FIDES, Progent).
+
+      '
+    tipo: decision
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: 'Las defensas a nivel de prompt (delimitadores, datamarking) son refuerzo
+      probabilistico modesto y no eliminan el ataque; ninguna defensa actual es bala
+      de plata (ASR residual ~2.6% bajo ataque adaptativo hecho a mano).
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i1
+  - txt: 'El ecosistema MCP tiene CVEs nombrados confirmados (CVE-2025-6514 en mcp-remote
+      CVSS 9.6; CVE-2025-68143/68144/68145 en el Git MCP de Anthropic; SSRF en mcp-server-fetch
+      y playwright-mcp) y clases catalogadas: tool poisoning, SSRF, path traversal.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r6
+    inferida_por: i2
+  - txt: 'Las cifras de prevalencia MCP (SSRF 36.7% vs 30%; path traversal 82%) son
+      contestadas y dependientes de metodologia (una auditoria reporto ~78% falsos
+      positivos en escaneres YARA): se marcan EN VIAS DE CONSOLIDACION, no durables.
+
+      '
+    tipo: claim
+    estatus: provisional
+    survived_from: r5
+    inferida_por: i2

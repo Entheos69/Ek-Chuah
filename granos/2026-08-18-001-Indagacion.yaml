@@ -1,0 +1,48 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-08-18-001-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'El claim de precios Railway del grano 2026-07-12 tiene capture_ts de
+      hace 38 dias. Antes de pesarlo en la decision BACKEND hay que ver si el tier
+      sigue vigente.
+
+      '
+    busqueda:
+    - railway pricing hobby pro minimum usage 2026
+    resultados_crudos:
+    - fuente: railway.com/pricing
+      texto: Hobby $5 minimum usage
+    - fuente: railway.com/pricing
+      texto: 99.9% Availability Target
+    conclusion: 'Los dos componentes del claim previo (tier minimo y target de disponibilidad)
+      siguen publicados sin cambio al 2026-08-19. Lectura, no dato: solo se verifico
+      la pagina de precios publica, no el contrato.
+
+      '
+    inferidor:
+      model: estratega/claude-opus-5
+      ts: '2026-08-18T22:52:00-06:00'
+  necesidad:
+    pregunta: ¿Sigue vigente el tier de precios Railway que sostiene el claim del
+      grano 2026-07-12?
+    gatillo: explicito:'podemos mejorar su alcance o sus busquedas desde esta opcion'
+    origen_nodo: null
+  consultas:
+  - formulacion: railway pricing hobby pro minimum usage 2026
+    referencias:
+    - local_id: r1
+      url: https://railway.com/pricing
+      content_hash: 0d9ac668810f407b6294925ed9ff950da07d471cb790a34e5adc394ed956d192
+      capture_ts: '2026-09-12T13:38:42'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: Railway mantiene Hobby en $5 de uso minimo mensual con target 99.9% al 2026-08-19.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
