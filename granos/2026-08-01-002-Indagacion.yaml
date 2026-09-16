@@ -1,0 +1,150 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-08-01-002-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'El reporte de posicionamiento INDUPOX requiere un mapa del parque automotriz
+      reparable: que familias de plastico existen, que ruta de reparacion admite cada
+      una (soldadura, quimica, adhesion 2K) y cual es el eje que decide la ruta. El
+      documento del Guardian cubre poliolefinas/flameado, ABS y PVC rigido; falta
+      el cuadro completo y la posicion del epoxico frente a PU y soldadura.
+
+      '
+    busqueda:
+    - plásticos industria automotriz tipos PP ABS PA policarbonato composites
+    - reparación plásticos automotrices soldadura termoplástica vs adhesivo epóxico
+      poliuretano promotor adherencia
+    resultados_crudos:
+    - fuente: next.henkel-adhesives.com (Teroson)
+      texto: Los termoplásticos rígidos se pueden reparar también con adhesivos bicomponentes
+        y soldadura
+    - fuente: elchapista.com (tabla de plasticos del automovil)
+      texto: Excelente adherencia en cualquier plástico, excepto los olefínicos
+    conclusion: 'Dos ejes gobiernan la ruta de reparacion: polaridad superficial y
+      arquitectura termica (termoplastico/termoestable). Los polares rigidos (ABS,
+      PC, PA, PVC-R) aceptan adhesion epoxica directa sin promotor; las poliolefinas
+      (PP/TPO) quedan fuera del alcance directo del epoxico salvo flameado + promotor.
+      El PU domina termoplasticos flexibles; el epoxico domina rigidos y reforzados.
+      Lectura fechada, re-derivable de los insumos.
+
+      '
+    inferidor:
+      model: estratega/claude-fable-5
+      ts: '2026-08-01T21:05:00'
+  - local_id: i2
+    premisa: 'Dentro del mapa, identificar el territorio donde el adhesivo epoxico
+      bicomponente no compite contra la soldadura sino que es la unica via: los plasticos
+      reforzados termoestables (SMC/FRP/GFRP/CFRP), y la practica de referencia comercial
+      (3M) que define el espacio de producto para las variantes INDUPOX ya disenadas.
+
+      '
+    busqueda:
+    - SMC fiberglass automotive body panel repair epoxy adhesive bonding
+    - composites automotriz CFRP GFRP reparación adhesivo estructural epóxico fibra
+      carbono
+    resultados_crudos:
+    - fuente: industrial.sherwin-williams.com (ficha 3M SMC/Fiberglass Repair Adhesive)
+      texto: two-part urethanes or two-part epoxies used to bond backup strips to
+        SMC
+    - fuente: vizonfiber.com (fibra de carbono automotriz)
+      texto: El CFRP no puede soldarse
+    conclusion: 'En SMC/FRP el adhesivo estructural 2K es la categoria de reparacion,
+      no un competidor de la soldadura: tiras de respaldo por cara posterior, relleno
+      lijable y pegado de paneles mapean uno a uno con las variantes INDUPOX V3/V2/V1.
+      CFRP es horizonte (adhesion como unica via de union pero con curado y certificacion
+      estrictos; la industria hoy sustituye mas que repara). Nota de locator: la URL
+      canonica 3m.com resulto inalcanzable desde el actor local (timeout en prevuelo
+      del grano 2026-08-01-001-Indagacion, nunca ingerido); se sustituyo por la ficha
+      del mismo producto en el distribuidor oficial Sherwin-Williams, que reproduce
+      verbatim la frase load-bearing citada. Riesgo de link-rot aceptado y documentado.
+      Lectura fechada, re-derivable de los insumos.
+
+      '
+    inferidor:
+      model: estratega/claude-fable-5
+      ts: '2026-08-01T21:06:00'
+  necesidad:
+    pregunta: '¿Que plasticos y plasticos reforzados componen el parque automotriz
+      reparable, que tecnica de reparacion admite cada familia, y en cuales tiene
+      aplicacion directa u obligada el sistema epoxico INDUPOX (actual y futuro)?
+
+      '
+    gatillo: explicito:'crea un reporte sobre plasticos y plasticos reforzados presentes
+      en la industria automotriz, sus tecnicas de reparacion y la aplicacion de nuestros
+      adhesivos / Genera el grano (YAML AEC)'
+    origen_nodo: null
+  consultas:
+  - formulacion: plásticos industria automotriz tipos PP ABS PA policarbonato composites
+    referencias:
+    - local_id: r4
+      url: http://www.elchapista.com/nomenclaturas_e_informacion_de_tipos_de_plasticos.html
+      content_hash: 8b0d71b4ee7f32b1d09fc7765e5326a57e41f1b97f34c8d64967b7eb8bf1ab50
+      capture_ts: '2026-08-01T15:31:59'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: reparación plásticos automotrices soldadura termoplástica vs adhesivo
+      epóxico poliuretano promotor adherencia
+    referencias:
+    - local_id: r2
+      url: https://next.henkel-adhesives.com/es/es/articles/reparar-plasticos-coche.html
+      content_hash: 01440719358b44ada8af4b5f63f01730443bb46fce9b03d0dbcfaca12030b69d
+      capture_ts: '2026-08-01T15:31:59'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: SMC fiberglass automotive body panel repair epoxy adhesive bonding
+    referencias:
+    - local_id: r1
+      url: https://industrial.sherwin-williams.com/na/us/en/automotive/catalog/product/products-by-industry.11543143/3m-smc-fiberglass-repair-adhesive.9165537.html
+      content_hash: 448fbc50430800413b69f5c66c3679efa95b64e50cc49bac4301b7eef42628d5
+      capture_ts: '2026-08-01T15:31:59'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: composites automotriz CFRP GFRP reparación adhesivo estructural epóxico
+      fibra carbono
+    referencias:
+    - local_id: r3
+      url: https://www.vizonfiber.com/es/the-application-of-carbon-fiber-in-the-automotive-industry
+      content_hash: 067285d4b74735bd924e97614cb5114a45502e9b4385db3667b695979363aee4
+      capture_ts: '2026-08-01T15:32:02'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: 'La ruta de reparacion de un plastico automotriz se decide por el eje polaridad
+      + termoplastico/termoestable; los termoestables no son soldables y su reparacion
+      exige adhesivos bicomponentes.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i1
+  - txt: 'Los sustratos polares rigidos (ABS, PC, PA, PVC rigido) aceptan adhesion
+      epoxica directa sin promotor; las poliolefinas (PP/TPO) quedan fuera del alcance
+      directo del sistema epoxico INDUPOX salvo flameado + promotor de adherencia.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r4
+    inferida_por: i1
+  - txt: 'En SMC/FRP la practica de referencia comercial es el epoxico 2K (tiras de
+      respaldo, pegado de paneles, relleno): nicho central y prioridad P1 de verificacion
+      de adhesion para las variantes INDUPOX V1/V2/V3.
+
+      '
+    tipo: decision
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i2
+  - txt: 'El CFRP no es soldable; la union adhesiva es la via estructural pero con
+      condiciones de curado y certificacion estrictas: horizonte de producto, no alcance
+      inmediato.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r3
+    inferida_por: i2

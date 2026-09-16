@@ -1,0 +1,125 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-09-13-002-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'Orden del Guardian: recalibrar el arsenal de precio a los 8 asientos
+      confirmados por el cliente (Taller-WA: +logistica +almacen) y re-verificar las
+      anclas de mercado antes de la conversacion de precio que el SOW va a provocar.
+      La evidencia vigente era de jun-2026 (3 meses vieja); recitar anclas envejecidas
+      en la mesa comercial es el mismo error que el careo del Paso 8 corrigio en codigo.
+
+      '
+    busqueda:
+    - Salesforce Enterprise edition price per user 2026
+    - HubSpot Sales Hub Enterprise price per seat 2026
+    - Zoho CRM Enterprise Dynamics 365 Sales price per user 2026
+    resultados_crudos:
+    - fuente: saascrmreview.com (Salesforce Pricing 2026, checked 2026-07-06)
+      texto: treat the lower figures as stale unless you re-verify them
+    - fuente: redresscompliance.com (Salesforce Pricing 2026)
+      texto: Enterprise edition rose from $165 to $175 (+6.1%)
+    - fuente: encharge.io (HubSpot Pricing, Aug 2026 update)
+      texto: Enterprise - $150/mo per seat
+    - fuente: zoho.com/crm/compare/microsoft-dynamics
+      texto: Microsoft Dynamics 365 Sales Enterprise ($105/user/ month)
+    - fuente: meetergo.com (Zoho CRM Pricing 2026, checked 2026-08-06)
+      texto: Standard $14, Professional $23, Enterprise $40 and Ultimate $52
+    conclusion: 'Anclas sep-2026 confirmadas: Salesforce Sales Cloud Enterprise queda
+      FIRME en $175/usuario/mes (alza de ago-2025 desde $165; las paginas que aun
+      citan $165 son declaradamente stale) - el rango [165,175] del arsenal jun-2026
+      colapsa al extremo alto. HubSpot Sales Hub Enterprise estable en $150/asiento
+      + $3,500 de onboarding unica vez. Dynamics 365 se desglosa: Professional $65
+      (lo que el arsenal usaba como unica cifra) vs Sales ENTERPRISE $95-105 (el tier
+      comparable al alcance del CRM propio; $105 en la comparativa propia de Zoho).
+      Zoho Enterprise estable en $40 anual ($50 mensual). Cruce recalculado a 8 asientos
+      contra $51k: Salesforce $16,800/anio ~3.0 anios (<1.5 con implementacion tipica
+      $30k+), HubSpot $14,400 ~3.5, Dynamics Sales Ent $10,080 ~5.1 (Professional
+      $6,240 ~8.2), Zoho $3,840 ~13.3. Todos los cruces MEJORAN a favor del CRM propio
+      vs la version de 6 asientos; la bifurcacion del multiplicador multimarca (P3)
+      sigue abierta y solo agrava a los rivales. Arsenal actualizado a rev.2 con estas
+      cifras en ambas capas.
+
+      '
+    inferidor:
+      model: estratega/claude-fable-5
+      ts: '2026-09-13T18:35:00'
+  necesidad:
+    pregunta: '¿Que cobran hoy (sep-2026) los CRM genericos comparables por asiento,
+      y donde queda el cruce de costos contra los $51k del CRM propio con los 8 asientos
+      reales confirmados por el cliente?
+
+      '
+    gatillo: explicito:'Autorizo A' (recalibrar arsenal a 8 asientos + re-verificar
+      anclas de mercado, 2026-09-13)
+    origen_nodo: null
+  consultas:
+  - formulacion: Salesforce Enterprise edition price per user 2026
+    referencias:
+    - local_id: r1
+      url: https://saascrmreview.com/salesforce-pricing/
+      content_hash: b0c1d771f7e63223e7cfe1a978643cd840ebbdbba1f8b4888cb15607b5471fd4
+      capture_ts: '2026-09-16T08:30:03'
+      fecha_fuente: '2026-07-06'
+      estatus: viva
+  - formulacion: HubSpot Sales Hub Enterprise price per seat 2026
+    referencias:
+    - local_id: r3
+      url: https://encharge.io/hubspot-pricing/
+      content_hash: c84e66113bb16678c63e70ed18227532a580815f6ae5def3d8b838ad6aca56ab
+      capture_ts: '2026-09-16T08:30:05'
+      fecha_fuente: 2026-08
+      estatus: viva
+  - formulacion: Zoho CRM Enterprise Dynamics 365 Sales price per user 2026
+    referencias:
+    - local_id: r4
+      url: https://www.zoho.com/crm/compare/microsoft-dynamics.html
+      content_hash: 791865ffa11cca0a6d05f713b2335bc165598e14d757a3895ecaa3a83f63582f
+      capture_ts: '2026-09-16T08:30:06'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r5
+      url: https://meetergo.com/en/magazine/zoho-crm-pricing
+      content_hash: 4632279b31437e5edb918a161d79828bba787181e6ef86040af0e81fbb1e80df
+      capture_ts: '2026-09-16T08:30:08'
+      fecha_fuente: '2026-08-06'
+      estatus: viva
+  afirmaciones:
+  - txt: 'Salesforce Sales Cloud Enterprise cuesta $175/usuario/mes firme (sep-2026,
+      post-alza ago-2025); el rango [165,175] del arsenal jun-2026 queda superseded
+      al extremo alto.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: 'HubSpot Sales Hub Enterprise se mantiene en $150/asiento/mes con $3,500
+      de onboarding por unica vez.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r3
+    inferida_por: i1
+  - txt: 'El tier comparable de Dynamics 365 es Sales Enterprise a $95-105/ usuario/mes,
+      no el Professional de $65 que el arsenal usaba como cifra unica; ambos quedan
+      desglosados.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r4
+    inferida_por: i1
+  - txt: 'Con 8 asientos reales, el cruce contra $51k mejora en todos los rivales
+      (Salesforce ~3.0 anios, <1.5 con extras; HubSpot ~3.5; Dynamics SE ~5.1; Zoho
+      ~13.3); el arsenal pasa a rev.2 con evidencia sep-2026.
+
+      '
+    tipo: decision
+    estatus: afirmado
+    survived_from: r5
+    inferida_por: i1

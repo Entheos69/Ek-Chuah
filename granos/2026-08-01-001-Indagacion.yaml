@@ -1,0 +1,243 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-08-01-001-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'El Guardian reclasifica el dioxido de titanio como pigmento y pide adjudicar
+      por indagacion web la carga funcional mas usada o recomendada para adhesivos
+      epoxicos de dos componentes, como base de una serie de pruebas condicionada
+      a compra dentro del set de materializacion v2 de INDUPOX.
+
+      '
+    busqueda:
+    - most common fillers two component epoxy adhesive formulation calcium carbonate
+      talc silica
+    resultados_crudos:
+    - fuente: uspto.gov / patente US 9,856,374
+      texto: Preferred filler materials are calcium carbonates, calcined kaolins,
+        carbon black
+    - fuente: uspto.gov / patente US 7,084,210
+      texto: More preferred inorganic fillers include calcium carbonate
+    - fuente: chemicalformulaservices.com
+      texto: fillers include silica, calcium carbonate, talc, or glass fibers
+    conclusion: 'Convergencia sin ambiguedad entre patentes de formulacion y guias
+      del ramo: el carbonato de calcio es la carga preferida y mas citada para epoxicos
+      2K (rango tipico 10-70 % en peso, preferencia 20-60); talco segundo consistente;
+      la silice pirogenica es reologico (papel ya cubierto por la arcilla organica
+      de la linea) y las microesferas de vidrio carga ligera de nicho. Lectura fechada,
+      re-derivable de los extractos. La re-derivacion de la pasta de paridad (45.3/54.7,
+      r=1.00) es aritmetica interna del set v2, no de estas fuentes.
+
+      '
+    inferidor:
+      model: estratega/claude-fable-5
+      ts: '2026-08-01T10:02:00'
+  - local_id: i2
+    premisa: 'El set v2 abre la matriz de adhesion a acero, aluminio, plastico reforzado
+      con fibra de vidrio y plastico termoformado; falta la base documental de que
+      termoplasticos admiten union epoxica, con que preparacion, y cuales deben declararse
+      fuera de promesa estructural.
+
+      '
+    busqueda:
+    - epoxy adhesive bonding polypropylene ABS plastic surface preparation flame treatment
+      adhesion
+    resultados_crudos:
+    - fuente: kohesibond.com
+      texto: ABS, polycarbonate, and PVC can usually bond well with epoxy
+    - fuente: support.systemthree.com
+      texto: Epoxies in general will not form a strong bond to thermoplastics
+    - fuente: epoxyworks.com
+      texto: Plastics such as ABS greatly benefit from flame treating
+    - fuente: permabond.com
+      texto: low surface energy or poor wettability - typically only 29mN/m
+    conclusion: 'La evidencia divide tajante por energia superficial: ABS, policarbonato
+      y PVC adhieren bien con lija y limpieza (flameado mejora, en especial ABS);
+      las poliolefinas (PP/PE, ~29 mN/m contra >36 requeridos) no sostienen union
+      estructural confiable sin tratamiento, y aun flameadas la promesa es limitada.
+      Esto ordena en el set v2: identificacion previa del termoformado por densidad,
+      flameado protocolizado (~1 s de exposicion acumulada, verificacion por mojado
+      de gota), y celdas de poliolefina y acrilico declaradas informativas, sin criterio
+      de pase.
+
+      '
+    inferidor:
+      model: estratega/claude-fable-5
+      ts: '2026-08-01T10:08:00'
+  - local_id: i3
+    premisa: 'El Guardian pide considerar refuerzos estructurales (mallas plasticas
+      o de acero) para las variantes del set v2, con lo que recomiende la practica
+      documentada del ramo automotriz.
+
+      '
+    busqueda:
+    - reinforcing mesh epoxy repair fiberglass stainless steel mesh bumper plastic
+      repair reinforcement
+    resultados_crudos:
+    - fuente: polyvance.com
+      texto: like putting rebar into concrete... it makes the repair much stronger
+    - fuente: autobodytoolmart.com / Lord Fusor 700
+      texto: best used for backing patches, bumper tabs and other reinforcements
+    - fuente: engineerfix.com
+      texto: a reinforcing fiberglass or plastic mesh is embedded into the wet epoxy
+    conclusion: 'La malla embebida en el adhesivo es practica estandar del ramo de
+      reparacion automotriza de plasticos: capa de adhesivo, malla hundida en fresco,
+      capa que la cubre — refuerzo tipo varilla-en-concreto, ofrecido comercialmente
+      como respaldo de parches para adhesivos de dos componentes. Candidatas de ferreteria:
+      malla de fibra de vidrio (cinta de tablaroca) y malla metalica de mosquitero.
+      En el set v2 se materializa como puentes de junta a tope con tres condiciones
+      (corridas 45-47), condicionadas al insumo menor.
+
+      '
+    inferidor:
+      model: estratega/claude-fable-5
+      ts: '2026-08-01T10:14:00'
+  necesidad:
+    pregunta: 'Que carga funcional, que preparacion por sustrato y que refuerzo estructural
+      recomienda la practica documentada del ramo, para iterar el set de pruebas de
+      materializacion de INDUPOX a su version dos con base exogena y no con supuesto.
+
+      '
+    gatillo: explicito:'podemos dejarlo como pigmento y pensar en una carga opcional
+      (aun no comprada) que surja de una corrida por la WEB como la mas usada o recomendada...
+      necesitamos correr pruebas en acero, aluminio, plastico reforzado con fibra
+      de vidrio, plastico termoformado... y considerar refuerzos estructurales, como
+      mallas plasticas o de acero y lo que recomiende la investigacion correspondiente'
+    origen_nodo: null
+  consultas:
+  - formulacion: most common fillers two component epoxy adhesive formulation calcium
+      carbonate talc silica
+    referencias:
+    - local_id: r1
+      url: https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/9856374
+      content_hash: ab4088254451e6b5fed18dcf6cbc56548110478746ecd844a10d823187eea1ad
+      capture_ts: '2026-08-01T15:28:14'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r2
+      url: https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/7084210
+      content_hash: 94a86c8aed49ce93d9bda243f48b59073af979c3ff5381671222fe7bc8f21ddf
+      capture_ts: '2026-08-01T15:28:16'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r3
+      url: https://chemicalformulaservices.com/product/typical-epoxy-adhesive-formulation/
+      content_hash: 80bc2cc9b4f67367af9dde1edb3f37e4385bf3bc295cf3372a38a51ebe92c99c
+      capture_ts: '2026-08-01T15:28:17'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: epoxy adhesive bonding polypropylene ABS plastic surface preparation
+      flame treatment adhesion
+    referencias:
+    - local_id: r4
+      url: https://www.kohesibond.com/epoxy-adhesives-for-plastic/
+      content_hash: 38e5c92088affa7c3f61990613269b09284de666bf14cdf0d2485db2a357e360
+      capture_ts: '2026-08-01T15:28:21'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r5
+      url: https://support.systemthree.com/hc/en-us/articles/11908675778455-How-do-I-prep-thermoplastics-like-ABS-PVC-Polyethylene-and-Acrylic-before-bonding-with-epoxy
+      content_hash: 4a63dd5c846bd15cd0053534ac92f679a1f0877a399047822099d4076a2662e8
+      capture_ts: '2026-08-01T15:28:22'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r6
+      url: https://www.epoxyworks.com/flame-treating-plastics/
+      content_hash: 016e3f60fefb2d2a48eb9b3441878a31a94f3949c653b7e7a8d911d04ae0b395
+      capture_ts: '2026-08-01T15:28:22'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r7
+      url: https://www.permabond.com/resource-center/bonding-polypropylene-industrial-adhesive/
+      content_hash: 388e187b49fb8783ad067420bb31de3da9905e96f5fe592c822d409fed636fcb
+      capture_ts: '2026-08-01T15:28:23'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: reinforcing mesh epoxy repair fiberglass stainless steel mesh bumper
+      plastic repair reinforcement
+    referencias:
+    - local_id: r8
+      url: https://www.polyvance.com/Reinforcing-Mesh-1/
+      content_hash: 63965b6d1a1698dbdab54a1455fc336a0011df0e7582bf50396873b97c53d804
+      capture_ts: '2026-08-01T15:28:24'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r9
+      url: https://www.autobodytoolmart.com/product/lord-fusor-bumper-reinforcing-mesh-700/auto-body-plastic-repair-tools
+      content_hash: 64cf86b432ee803b61f398fb1c01d99165a765e70303d478239bcbb9d6f8193e
+      capture_ts: '2026-08-01T15:28:25'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r10
+      url: https://engineerfix.com/how-to-fix-a-plastic-bumper-step-by-step-repair/
+      content_hash: ade476e187448dbf23242ead0006f64ae80fd6c4e1e743954fec6bcbb9d5cc39
+      capture_ts: '2026-08-01T15:28:25'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: 'El carbonato de calcio es la carga funcional preferida y mas citada para
+      adhesivos epoxicos de dos componentes; rango tipico 10-70 % en peso con preferencia
+      20-60; talco segundo consistente.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: 'Decision del set v2: el dioxido de titanio queda reclasificado como pigmento
+      y el carbonato de calcio natural molido se adopta como carga funcional candidata
+      de la serie condicionada a compra (corridas 48-56).
+
+      '
+    tipo: decision
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i1
+  - txt: 'ABS, policarbonato y PVC admiten union epoxica con preparacion simple; los
+      epoxicos no forman union estructural confiable sobre termoplasticos de baja
+      energia (poliolefinas ~29 mN/m) sin tratamiento superficial.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r4
+    inferida_por: i2
+  - txt: 'El flameado con soplete (exposicion acumulada de ~1 s, sin decolorar) eleva
+      la energia superficial y mejora la adhesion epoxica sobre termoplasticos, en
+      especial ABS; verificacion practica por extension de gota de agua.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r6
+    inferida_por: i2
+  - txt: 'Decision del set v2: la matriz de adhesion declara informativas, sin criterio
+      de pase, las celdas de poliolefina y acrilico; el termoformado se identifica
+      por densidad antes de tratarse (corrida 44).
+
+      '
+    tipo: decision
+    estatus: afirmado
+    survived_from: r5
+    inferida_por: i2
+  - txt: 'La malla embebida en adhesivo (capa-malla-capa) es practica estandar de
+      refuerzo en reparacion automotriz de plasticos, tipo varilla-en-concreto, ofrecida
+      comercialmente como respaldo de parches para adhesivos de dos componentes.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r8
+    inferida_por: i3
+  - txt: 'Decision del set v2: puentes de junta a tope con malla de fibra de vidrio
+      y malla metalica como corridas 45-47, condicionadas a insumo menor de ferreteria,
+      con criterio de falla contenida.
+
+      '
+    tipo: decision
+    estatus: afirmado
+    survived_from: r9
+    inferida_por: i3

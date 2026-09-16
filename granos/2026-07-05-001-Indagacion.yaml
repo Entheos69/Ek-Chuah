@@ -1,0 +1,120 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-07-05-001-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'El claim del grano 2026-07-02 (af 0bf4fc00...) dejo un mandato interno
+      explicito: la senal de inestabilidad de Railway "proviene de un competidor y
+      debe verificarse contra el status page antes de pesarla". El camino de revision
+      del AEC nunca se ha ejercido (0 revisiones en el log); este es el caso de prueba
+      sancionado.
+
+      '
+    busqueda:
+    - Railway.app status page incidents June July 2026 uptime
+    - 'fetch: https://status.railway.com/'
+    - 'fetch: https://railway.com/pricing'
+    resultados_crudos:
+    - fuente: status.railway.com (overview)
+      texto: Fully Operational
+    - fuente: status.railway.com (metodologia)
+      texto: reports incidents with significant, widespread user impact
+    - fuente: railway.com/pricing (plan Pro)
+      texto: Includes $20 of monthly usage credits
+    - fuente: statusgator.com (agregador tercero)
+      texto: 51 incidents (5 major outages and 46 minor incidents)
+    - fuente: northflank.com/blog (competidor)
+      texto: 'Railway app outage: where to host your projects instead'
+    conclusion: 'El status page oficial (2026-07-05) refuta la alarma: plataforma
+      Fully Operational, junio 2026 en 100.00% de uptime en todos los componentes
+      core, y un unico incidente de impacto amplio en julio (Edge Network, regiones
+      US, 2026-07-02, ~3h; julio queda en 99.42% para ese componente). La cifra de
+      agregadores (51 incidentes/90d) no es comparable: cuenta eventos menores por
+      componente, mientras el status page oficial solo publica impacto amplio y ademas
+      lo declara textualmente en su metodologia. La senal alarmista nace de esa confusion
+      metodologica y su amplificador principal es el blog de un competidor directo
+      (Northflank). El componente de precios del claim previo sigue exacto: Hobby
+      $5 y Pro $20 de uso minimo mensual, con targets de disponibilidad 99.9% (Hobby)
+      y 99.99% (Pro). Ventana de link-rot aceptada: el status page y pricing son paginas
+      vivas; la captura local pineara la version.
+
+      '
+    inferidor:
+      model: cowork/claude-fable-5
+      ts: '2026-07-05T19:25:00'
+  necesidad:
+    pregunta: '¿Se sostiene la senal de inestabilidad de Railway al verificarla contra
+      el status page oficial, como exigia el claim pendiente del grano 2026-07-02,
+      antes de pesarla en la decision BACKEND del CRM multimarca?
+
+      '
+    gatillo: explicito:'hazlo' (sancion del Guardian a la propuesta de Cowork de ejercitar
+      el camino de revision re-verificando el claim Railway contra el status page)
+    origen_nodo: decision:BACKEND-plataforma-CRM-multimarca
+  consultas:
+  - formulacion: Railway.app status page incidents June July 2026 uptime
+    referencias:
+    - local_id: r3
+      url: https://statusgator.com/services/railway
+      content_hash: 6c2191d888993dd495172118ba663dedd22afc648a082381eea8da8ecd62bd34
+      capture_ts: '2026-07-12T16:36:25'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r4
+      url: https://northflank.com/blog/railway-app-outage
+      content_hash: ce2b5f842a9f0c5163286b81652b49cc9b155572a74f263468ae4a024bdfe255
+      capture_ts: '2026-07-12T16:36:25'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: 'fetch: https://status.railway.com/'
+    referencias:
+    - local_id: r1
+      url: https://status.railway.com/
+      content_hash: 7aadd96bf7f99123e9257e49270132e033a1685acb07051bc6a0f424adbed984
+      capture_ts: '2026-07-12T16:36:26'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: 'fetch: https://railway.com/pricing'
+    referencias:
+    - local_id: r2
+      url: https://railway.com/pricing
+      content_hash: ed6064c3c3a274b25779559f985c0a67d91c03d2807c718854f5e731f4c9c64a
+      capture_ts: '2026-07-12T16:36:26'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: 'Verificado contra el status page oficial (mandato del claim previo): Railway
+      Fully Operational, junio 2026 con 100.00% de uptime en componentes core y un
+      unico incidente amplio (Edge Network US, 2026-07-02, ~3h). La senal de inestabilidad
+      NO se sostiene; Railway se confirma como default viable del CRM multimarca.
+      Este hallazgo salda el pendiente de verificacion de la afirmacion 0bf4fc00...
+      del grano 2026-07-02 y la supera.
+
+      '
+    tipo: decision
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: 'La discrepancia con agregadores terceros (51 incidentes/90d) es metodologica,
+      no factual: los agregadores cuentan eventos menores por componente; el status
+      page oficial solo publica incidentes de impacto amplio y asi lo declara. Regla
+      derivada: cifras de incidentes solo son comparables dentro de la misma metodologia
+      de conteo.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r3
+    inferida_por: i1
+  - txt: 'Precios Railway vigentes al 2026-07-05: Hobby $5 y Pro $20 de uso minimo
+      mensual (creditos incluidos), targets de disponibilidad 99.9%/99.99%. El componente
+      de precio del claim del grano 2026-07-02 sigue exacto.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i1

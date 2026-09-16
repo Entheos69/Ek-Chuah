@@ -1,0 +1,183 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-07-18-001-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'Los agentes del ecosistema (Estratega, Bibliotecario, CodeCS, etc.)
+      carecen de referencia espacio-temporal: no saben en que dia u hora operan, no
+      lo registran en sus artefactos, y confabulan deltas entre sesiones (asumen "sesion
+      anterior = dia anterior"). El caso Alex topologico mostro que inyectar contexto
+      temporal habilita una clase entera de inferencias situacionales. Se busca fundamento
+      en la literatura reciente (papers 2025-2026), en teoria de marcos de referencia
+      y en la tradicion de relojes logicos de sistemas distribuidos, para disenar
+      una dimension espacio-temporal transversal a todos los agentes.
+
+      '
+    busqueda:
+    - temporal grounding large language models paper 2025 2026
+    - LLM agents temporal awareness current date confabulation situational awareness
+      paper
+    - time-aware memory multi-session dialogue LLM agent timestamp episodic memory
+      2025
+    - logical clocks Lamport vector clocks multi-agent LLM systems event ordering
+    - Zep Graphiti bi-temporal knowledge graph agent memory valid_at invalid_at
+    resultados_crudos:
+    - fuente: arxiv.org/abs/2510.23853 (Your LLM Agents are Temporally Blind)
+      texto: misalignment issues arising from agents' temporal blindness
+    - fuente: 'arxiv.org/pdf/2505.20243 (It''s High Time: A Survey of Temporal Information
+        Retrieval and Question Answering, seccion F.2)'
+      texto: agents treat dialogue turns largely independently, causing temporal anchors
+        to drift
+    - fuente: arxiv.org/abs/2510.16685 (Structured yet Bounded Temporal Understanding)
+      texto: contrasting deictic framing (past-present-future) and sequential framing
+        (before-after)
+    - fuente: 'arxiv.org/abs/2501.13956 (Zep: Temporal Knowledge Graph for Agent Memory)'
+      texto: maintaining a timeline of facts and relationships, including their periods
+        of validity
+    - fuente: aeron.io/docs/distributed-systems-basics/logical-clocks (sobre Lamport
+        1978)
+      texto: time is less important than agreement across components of the order
+    - fuente: snormore.dev/blog/logical-clocks-in-distributed-systems (Hybrid Logical
+        Clocks)
+      texto: a physical timestamp (wall-clock time) and a logical counter
+    conclusion: 'La ceguera temporal de agentes LLM es un fenomeno nombrado y estudiado
+      (2025-2026), con mecanismo identificado: deriva de anclas temporales por tratamiento
+      independiente de turnos/sesiones. La receta minima de la literatura coincide
+      con el diseno E1-E4 propuesto y agrega un quinto componente (verificacion de
+      consistencia post-generacion). La teoria de marcos temporales de referencia
+      (t-FoR) distingue marco deictico (requiere "ahora" anclado) de secuencial (requiere
+      solo orden relativo); nuestros agentes operan hoy en secuencial degradado y
+      confabulan al exigirseles deictico. La tradicion de relojes logicos (Lamport
+      1978 -> vector clocks -> HLC) aporta el principio de que el orden causal acordado
+      importa mas que el tiempo fisico, y el HLC (timestamp fisico + contador logico)
+      es el estandar pragmatico aplicable al cabezal de sesion. El modelo bi-temporal
+      de Zep/Graphiti (t_valid/t_invalid mundo + t_created/t_expired transaccional)
+      es el estado del arte en persistencia de memoria de agentes y formaliza nuestra
+      regla epistemologica 4 (liveness != veracidad). Lectura fechada y re-derivable
+      de los insumos; las URLs arXiv son estables, las dos fuentes de relojes logicos
+      son paginas de divulgacion tecnica con riesgo moderado de link-rot (aceptado,
+      el concepto ancla es Lamport doi 10.1145/359545.359563).
+
+      '
+    inferidor:
+      model: estratega/claude-fable-5
+      ts: '2026-07-18T18:11:40'
+  necesidad:
+    pregunta: 'Como dotar de referencia espacio-temporal a todos los agentes del ecosistema
+      para eliminar la confabulacion de deltas entre sesiones y habilitar inferencias
+      situacionales.
+
+      '
+    gatillo: explicito:'reforzarlo con una busqueda a profundidad en la WEB considera
+      los paper mas recientes sobre el tema... necesito... primero el grano correspondiente'
+    origen_nodo: null
+  consultas:
+  - formulacion: LLM agents temporal awareness current date confabulation situational
+      awareness paper
+    referencias:
+    - local_id: r1
+      url: https://arxiv.org/abs/2510.23853
+      content_hash: 29e8beb9672b8bb7dfffcc967c010e7172224233b874b8962926823725d496da
+      capture_ts: '2026-07-18T17:24:12'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r2
+      url: https://arxiv.org/pdf/2505.20243
+      content_hash: 5c90ea7a561406629253c9306e0162486f665e76b04e11c079c38c330c7c4c0b
+      capture_ts: '2026-07-18T17:24:12'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: temporal grounding large language models paper 2025 2026
+    referencias:
+    - local_id: r3
+      url: https://arxiv.org/abs/2510.16685
+      content_hash: 01617ba68c473b9a66235ca3ee6b81961a737dba1db491d4f76f137f3b73b962
+      capture_ts: '2026-07-18T17:24:12'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: Zep Graphiti bi-temporal knowledge graph agent memory valid_at invalid_at
+    referencias:
+    - local_id: r4
+      url: https://arxiv.org/abs/2501.13956
+      content_hash: 000776d8bd2e431523d32f23c15bfc28741ba0fe37acc195ba16f49fc5a15dce
+      capture_ts: '2026-07-18T17:24:13'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: logical clocks Lamport vector clocks multi-agent LLM systems event
+      ordering
+    referencias:
+    - local_id: r5
+      url: https://aeron.io/docs/distributed-systems-basics/logical-clocks/
+      content_hash: 3da23837708022b55200f6dc81f02688b19412ea4001c1fe7326beb33a1e943d
+      capture_ts: '2026-07-18T17:24:13'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r6
+      url: https://snormore.dev/blog/logical-clocks-in-distributed-systems/
+      content_hash: a2b3ca420496c6506c03dada0e66c5eb24f65347559426e43cd7744e3c9bc08f
+      capture_ts: '2026-07-18T17:24:14'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: 'La desorientacion temporal de agentes LLM es un fenomeno identificado en
+      la literatura como "temporal blindness": desalineacion entre decisiones del
+      agente y la percepcion humana del tiempo en escenarios multi-turno que evolucionan.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: 'El mecanismo de la confabulacion "sesion anterior = ayer" es la deriva de
+      anclas temporales: los agentes tratan turnos y sesiones de forma independiente.
+      La receta minima correctiva tiene tres componentes: memoria temporal persistente
+      indexada por tiempo, modulo de seguimiento de linea temporal entre interacciones,
+      y mecanismo de verificacion de consistencia contra restricciones temporales
+      almacenadas.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i1
+  - txt: 'Existen dos marcos temporales de referencia (t-FoR): deictico (pasado-presente-futuro,
+      requiere un "ahora" anclado) y secuencial (antes-despues, requiere solo orden
+      relativo). El cabezal de sesion debe alimentar ambos: ts_now para el deictico
+      y delta calculado de ultima sesion para el secuencial.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r3
+    inferida_por: i1
+  - txt: 'El estandar de facto 2025-2026 para persistencia temporal en memoria de
+      agentes es el modelo bi-temporal: linea del mundo (t_valid, t_invalid) mas linea
+      transaccional (t_created, t_expired), con invalidacion no destructiva de hechos
+      superados. Formaliza la regla epistemologica 4 del ecosistema (liveness != veracidad).
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r4
+    inferida_por: i1
+  - txt: 'En sistemas de procesos paralelos sin reloj global, el acuerdo sobre el
+      orden causal de eventos importa mas que el tiempo fisico (Lamport 1978). Los
+      vector clocks distinguen causalidad de concurrencia entre agentes.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r5
+    inferida_por: i1
+  - txt: 'El Hybrid Logical Clock (timestamp fisico + contador logico) es el punto
+      medio pragmatico adoptado por sistemas distribuidos modernos y es la forma recomendada
+      para el sello del cabezal de sesion: (ts_ISO_offset, seq_agente).
+
+      '
+    tipo: decision
+    estatus: afirmado
+    survived_from: r6
+    inferida_por: i1

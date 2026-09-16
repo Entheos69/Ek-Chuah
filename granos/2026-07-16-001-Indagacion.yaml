@@ -1,0 +1,125 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-07-16-001-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'El DICTAMEN F1 INDUPOX (pre-laboratorio, 2026-07-16) declaro como requisito
+      previo a F0 que "el referente Evonik" del Endurecedor 2353 de CMP no tiene nombre
+      de producto ni ID de TDS en ningun canonico (obs. editorial §5.3). Sin ese documento,
+      los criterios F0-a/b/d quedan sin numeros ancla y la equivalencia CMP-vs-Evonik
+      no es adjudicable. El candidato natural por nomenclatura es Ancamide 2353 de
+      Evonik.
+
+      '
+    busqueda:
+    - Ancamide 2353 Evonik technical data sheet AHEW
+    resultados_crudos:
+    - fuente: products.evonik.com (TDS oficial Ancamide 2353, PDF)
+      texto: Equivalent Wt/{H} 114
+    - fuente: specialchem.com (ficha Ancamide 2353, adhesivos)
+      texto: recommended usage level at EEW=190 is 60 phr
+    conclusion: 'LECTURA (interpretacion fechada, no dato): (1) El referente existe
+      y es Ancamide 2353 de Evonik, poliamida modificada de alto desempeno; el TDS
+      oficial esta publicado en products.evonik.com (asset PV 52041310, pie de pagina
+      fechado 2026-03-26). (2) El AHEW del referente es 114, NO 120 como asume el
+      supuesto raiz S2 del dictamen: la dosis recomendada 60 phr a EEW=190 es consistente
+      (0.60x190=114). A formato 1:1 vol de V-11, r pasa de 1.014 a ~1.07 (+6.7% exceso
+      amina) - sigue dentro de latitud; la conclusion de robustez del dictamen se
+      sostiene, pero S2 debe corregirse a 114 si F0 corrobora la equivalencia. (3)
+      El gel time del TDS (150 g, Techne GT-4) es 65 min: el criterio F0-a del presupuesto
+      coincide verbatim con el referente - el canonico claramente derivo de este documento.
+      (4) Shore D del referente = 80 (ASTM D2240, 60 phr, 7 dias): el umbral F0-b
+      >=75 propuesto como [supuesto S8] adquiere fuente (TDS menos 5 pts). (5) El
+      TDS identifica "Epodil 748: C12-14 Alkyl Glycidyl Ether" - diluyente REACTIVO
+      monofuncional: el supuesto S7 del dictamen se inclina fuertemente al caso reactivo
+      para el Diluyente 748 de CMP (presunto analogo), favoreciendo el ratio 100:21
+      en la corrida C1 de P-51. (6) Specific gravity del referente = 1.01 (no 0.98
+      como derive del canonico P-51): la auditoria de densidades Q4 del Apendice se
+      re-abre - con rho(2353)=1.01 la ficha V-11 (1.04) cuadra y las de F-11/P-51
+      quedan bajas; el outlier podria ser el inverso del dictaminado. D1 adjudica.
+      (7) Peak exotherm del TDS: 300 F (149 C) en masa de 100 g - corrobora la cota
+      adiabatica ~150 C derivada en Q6.2. CAVEAT global: todos estos son valores del
+      REFERENTE Ancamide; la equivalencia del 2353 de CMP sigue condicional hasta
+      F0.
+
+      '
+    inferidor:
+      model: fable/claude-fable-5
+      ts: '2026-07-16T15:05:00'
+  necesidad:
+    pregunta: 'Que producto Evonik es el referente del Endurecedor 2353 de CMP, y
+      que valores publica su TDS oficial (AHEW, gel time, Shore D, densidad) para
+      anclar numericamente los criterios F0-a/b/d del dictamen F1 INDUPOX.
+
+      '
+    gatillo: explicito:'Si hiciste investigacion en la web genera el grano correspondiente'
+      + 'yaml AEC' (Guardian, 2026-07-16; sancion de la indagacion pendiente ofrecida
+      por Fable)
+    origen_nodo: null
+  consultas:
+  - formulacion: Ancamide 2353 Evonik technical data sheet AHEW
+    referencias:
+    - local_id: r1
+      url: https://products.evonik.com/assets/s_/us/Ancamide_2353_us_TDS_EN_EN_TDS_PV_52041310_en_US_US.pdf
+      content_hash: 2b7061d4a96e2cebb7da56582eec13fa93d9db59adec74f71ee7af491fa92520
+      capture_ts: '2026-07-18T17:22:32'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r2
+      url: https://www.specialchem.com/adhesives/product/evonik-ancamide-2353
+      content_hash: b462ed5304460cfb436c670a6a635e51e77ee2a87bebf1c4c1570ad9407570c5
+      capture_ts: '2026-07-18T17:22:33'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: 'El referente Evonik del Endurecedor 2353 es Ancamide 2353; su TDS oficial
+      es el asset PV 52041310 de products.evonik.com (pie fechado 2026-03-26). Requisito
+      §5.3 del dictamen F1: SALDADO.
+
+      '
+    tipo: decision
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: 'AHEW del referente = 114 g/eq (TDS: Equivalent Wt/{H} 114; uso 60 phr a
+      EEW=190). El supuesto raiz S2 del dictamen (AHEW=120) debe corregirse a 114
+      condicionado a que F0 corrobore la equivalencia CMP-Ancamide; a 1:1 vol el balance
+      de V-11 pasa a r~1.07, dentro de latitud - la robustez del formato se sostiene.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: 'Gel time del referente (150 g, Techne GT-4) = 65 min y Shore D = 80: los
+      criterios F0-a (65 min +/-15%) y F0-b (>=75 = TDS-5) del dictamen quedan anclados
+      a fuente publicada; el umbral >=75 deja de ser supuesto S8 y pasa a derivado-de-TDS.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: 'Epodil 748 = C12-C14 alkyl glycidyl ether (diluyente REACTIVO monofuncional)
+      segun el propio TDS del referente; el supuesto S7 se inclina al caso reactivo
+      para el Diluyente 748 de CMP, favoreciendo 100:21 como ganador esperado de la
+      corrida C1 de P-51 (confirmar con TDS CMP + F2.3).
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: 'Specific gravity del referente = 1.01 y peak exotherm = 300 F en 100 g:
+      (a) la auditoria de densidades Q4 se re-abre - con rho(2353)=1.01 el outlier
+      podria ser F-11/P-51 y no V-11; D1 adjudica con probeta y balanza; (b) la cota
+      adiabatica ~150 C de Q6.2 queda corroborada por dato publicado.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
