@@ -8,6 +8,11 @@ __pycache__/
 *.pyc
 *.pyo
 
+# Entorno virtual (regla F77): un venv NO es reubicable ni portable entre maquinas;
+# se recrea con `C:/Python314/python -m venv venv` + `pip install -r requirements.txt`.
+venv/
+.venv/
+
 # El durable NO vive aqui (vive en ../AEC, fuera de todo repo).
 # Si alguien lo enlaza por error, que git no lo vea:
 AEC/

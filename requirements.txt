@@ -1,0 +1,14 @@
+# Ek-Chuah -- dependencias del pipeline de granos (substrato local del grafo AEC).
+#
+# Canon: skill desarrollar-ek-chuah (L113) -- "Solo stdlib + PyYAML + truststore;
+# psycopg solo en el export". No agregar dependencias sin autorizacion del Guardian.
+# Versiones verificadas instaladas 2026-09-17 contra Python 3.14.0 (C:/Python314).
+
+PyYAML==6.0.3
+truststore==0.10.4
+
+# psycopg -- SOLO camino B / export (exporta_log.py, nube.py). NO requerido para el
+# pipeline local (prevuelo/materializa/ingesta/consumido). La Mitad 2 del cruce a la
+# nube es MEDIADA (CodeMCP projection_build --replicate), no corre exporta_log desde
+# Git Bash. Descomentar solo si se autoriza correr el export localmente:
+# psycopg[binary]>=3.1
