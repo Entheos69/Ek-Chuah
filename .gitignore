@@ -19,3 +19,6 @@ AEC/
 
 # granos/ (los YAML-AEC, un grano por necesidad) SI se versionan: son la fuente
 # de la consolidacion (analogo a sessions/ de concept-sediment). No se ignoran.
+
+# Config local de Claude Code (personal, no versionar)
+.claude/settings.local.json
