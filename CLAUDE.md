@@ -28,26 +28,22 @@ CodeCS↔CodeEC (substrato) / CodeMCP↔CodeAEC (superficie MCP nube).
    Forma portable de la hora (Git Bash en Windows ignora `TZ` y da UTC):
    `t=$(TZ=America/Mexico_City date +%H:%M%:z); [ "${t#*-}" = "06:00" ] || t=$(date +%H:%M%:z)`.
 
-## Entorno virtual y Python (regla F77 + Capa 2, SOL 2026-09-17)
+## Entorno Python (regla F77 + SOL 2026-09-17 Bloque B)
 
-- **Intérprete del proyecto: `venv/Scripts/python.exe`** (ruta relativa a la raíz del repo).
-  Es el único intérprete determinista. `venv/Scripts/activate` es para la *ventana* (Git Bash),
-  no para el shell de la herramienta Bash.
-- **Nunca `python` ni `pip` a secas dentro del agente.** Medido (SOL 2026-09-17): el shell de la
-  herramienta NO sourcea `~/.bashsrc`; hereda el entorno de `claude`. Si la sesión no se lanzó por
-  `Ek_Chuah_`, `python` resuelve al global (`C:/Python314`) y `VIRTUAL_ENV` puede llegar fantasma
-  (apuntando a otro proyecto). No es un fallo que reparar a mano: se sortea llamando al intérprete
-  explícito.
-- **Primera acción de cada sesión:** `command -v python` y comparar con `venv/Scripts/python.exe`.
-  Si difieren, no pelear con el PATH: usar la ruta explícita. Si además `venv/Scripts/python.exe`
-  no ejecuta, parar y avisar al Guardian.
-- **Instalar:** `venv/Scripts/python.exe -m pip install <paquete>`. No usar `uv pip` sin
-  `--python venv/Scripts/python.exe`.
-- **NO crear, mover ni borrar entornos virtuales sin autorización del Guardian (dir. 5).**
+- Intérprete del proyecto: `$CLAUDE_PROJECT_PY` (exportado por el launcher de Git Bash).
+  Si la variable está vacía, usar la ruta literal: `venv/Scripts/python.exe`.
+- Nunca `python` ni `pip` a secas: el shell de la herramienta resuelve al Python global.
+  Medido (SOL 2026-09-17): el tool-shell no sourcea `~/.bashsrc`; hereda el entorno de `claude`,
+  y `VIRTUAL_ENV` puede llegar fantasma. Por eso se llama al intérprete explícito, no se pelea el PATH.
+- Instalar: `"$CLAUDE_PROJECT_PY" -m pip install <paquete>`.
+  Con uv: `uv pip install --python "$CLAUDE_PROJECT_PY" <paquete>`.
+- Primera acción de cada sesión: `echo "$CLAUDE_PROJECT_PY"` y `command -v python`;
+  si difieren, usar siempre la primera. Si `venv/Scripts/python.exe` no ejecuta, parar y avisar al Guardian.
+- NO crear, mover ni borrar entornos virtuales sin autorización del Guardian (dir. 5).
   Un venv no es reubicable: moverlo lo rompe; se recrea, no se mueve.
-- **Recrear:** `C:/Python314/python -m venv venv` +
-  `venv/Scripts/python.exe -m pip install -r requirements.txt`.
-  Dependencias: solo stdlib + PyYAML + truststore (`psycopg` solo en el export / camino B).
+- Recrear: `C:/Python314/python -m venv venv` +
+  `"$CLAUDE_PROJECT_PY" -m pip install -r requirements.txt`.
+  Dependencias: solo stdlib + PyYAML + truststore (psycopg / google.genai solo en camino B / export).
   Python real en Windows: `C:/Python314/python`. `python3` es el alias de la Microsoft Store: no usarlo.
 
 ## Trampas medidas (detalle en los skills)
