@@ -1,14 +1,18 @@
 # Ek-Chuah -- dependencias del pipeline de granos (substrato local del grafo AEC).
 #
-# Canon: skill desarrollar-ek-chuah (L113) -- "Solo stdlib + PyYAML + truststore;
-# psycopg solo en el export". No agregar dependencias sin autorizacion del Guardian.
+# Canon (realineamiento 14-sep): el pipeline local (prevuelo/materializa/ingesta/
+# consumido) es stdlib + PyYAML + truststore. La Mitad 2 del camino B ('ingesta --nube')
+# corre LOCAL y agrega psycopg2-binary + google-genai (ver abajo). No agregar
+# dependencias sin autorizacion del Guardian.
 # Versiones verificadas instaladas 2026-09-17 contra Python 3.14.0 (C:/Python314).
 
 PyYAML==6.0.3
 truststore==0.10.4
 
-# psycopg -- SOLO camino B / export (exporta_log.py, nube.py). NO requerido para el
-# pipeline local (prevuelo/materializa/ingesta/consumido). La Mitad 2 del cruce a la
-# nube es MEDIADA (CodeMCP projection_build --replicate), no corre exporta_log desde
-# Git Bash. Descomentar solo si se autoriza correr el export localmente:
-# psycopg[binary]>=3.1
+# Camino B (Mitad 2) -- REQUERIDO. Canon realineado (14-sep, ADDENDUM 3): el cruce a la
+# nube es 'ingesta --nube', un comando LOCAL y atomico (ingesta.py:405 importa nube).
+# NO es ya el mediado exporta_log/projection_build (doctrina derogada). Necesita:
+#   - psycopg2-binary: nube.py (import psycopg2) + fallback de exporta_log.py
+#   - google-genai:    nube.py (embeddings Gemini), espejo de Ek-Chuah-mcp
+psycopg2-binary==2.9.13
+google-genai==2.24.0
