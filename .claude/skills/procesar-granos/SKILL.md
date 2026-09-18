@@ -24,7 +24,8 @@ para pasar el gate): eso corrompe justo lo que el sistema protege.
 
       python -c "import truststore; truststore.inject_into_ssl(); import prevuelo, sys; sys.exit(prevuelo._main(['granos/<grano>.yaml']))"
 
-- **Solo stdlib + PyYAML + truststore** (ya instalados). `psycopg` solo para el export (camino B).
+- **Nucleo local: stdlib + PyYAML + truststore** (ya instalados). El camino B (`ingesta --nube`,
+  LOCAL; canon realineado 14-sep) agrega `psycopg2-binary` + `google-genai`, ya en `requirements.txt`.
 - Corre siempre desde la raiz del repo. El durable WORM vive FUERA del repo en `../AEC`.
 
 ## Pipeline (3 etapas, in-place)

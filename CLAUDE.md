@@ -43,7 +43,9 @@ CodeCS↔CodeEC (substrato) / CodeMCP↔CodeAEC (superficie MCP nube).
   Un venv no es reubicable: moverlo lo rompe; se recrea, no se mueve.
 - Recrear: `C:/Python314/python -m venv venv` +
   `"$CLAUDE_PROJECT_PY" -m pip install -r requirements.txt`.
-  Dependencias: solo stdlib + PyYAML + truststore (psycopg / google.genai solo en camino B / export).
+  Dependencias: nucleo del pipeline local = stdlib + PyYAML + truststore; la Mitad 2 del
+  camino B (`ingesta --nube`, LOCAL y atomica; canon realineado 14-sep) agrega
+  `psycopg2-binary` + `google-genai`. Todo esta ya en `requirements.txt` (commit 886b9ef).
   Python real en Windows: `C:/Python314/python`. `python3` es el alias de la Microsoft Store: no usarlo.
 
 ## Trampas medidas (detalle en los skills)

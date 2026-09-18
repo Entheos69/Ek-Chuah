@@ -110,8 +110,11 @@ Caracterizacion de cada modulo para NO re-investigar. Formato: **rol** | API cla
   (cruza contra el log) -> "consumido" == "la ingesta seria no-op", sin drift. Duplicar = bug futuro.
 - **Nunca fabriques procedencia.** Ninguna herramienta debe permitir que una afirmacion pase el gate
   sin su roca real. Si un cambio facilita saltarse C3, es un cambio malo aunque los tests pasen.
-- **Solo stdlib + PyYAML + truststore.** `psycopg` solo en el export. No agregues dependencias sin
-  una razon fuerte; el sistema se precia de correr con casi nada.
+- **Nucleo minimo: stdlib + PyYAML + truststore.** Ese es el pipeline local
+  (prevuelo/materializa/ingesta/consumido). La Mitad 2 del camino B (`ingesta --nube`) corre LOCAL
+  (canon realineado 14-sep, ADDENDUM 3) y agrega `psycopg2-binary` + `google-genai`, ya activos en
+  `requirements.txt` (commit 886b9ef). NO agregues mas dependencias sin una razon fuerte; el sistema se
+  precia de correr con casi nada.
 - **Sin emojis / solo ASCII en el codigo y la salida.** El encoding de Windows revienta con emojis.
   Todos los modulos existentes lo respetan; siguelo.
 - **Inyecta las dependencias de red.** `fetch`/`probe` son inyectables (default urllib) para que los
@@ -157,6 +160,6 @@ Caracterizacion de cada modulo para NO re-investigar. Formato: **rol** | API cla
 - [ ] Suite completa en verde (`unittest discover`).
 - [ ] Ningun camino nuevo permite afirmacion-sin-roca ni salta el gate C3.
 - [ ] Sin duplicar logica de ids (funcion pura compartida donde aplique).
-- [ ] Solo stdlib/PyYAML/truststore; sin emojis; red inyectable.
+- [ ] Deps segun `requirements.txt` (nucleo local stdlib/PyYAML/truststore; camino B agrega psycopg2-binary/google-genai); sin emojis; red inyectable.
 - [ ] README + skill(s) + memoria actualizados si cambio el contrato o el estado.
 - [ ] Commits limpios (codigo vs datos separados), rama + PR, merge solo con OK del usuario.
