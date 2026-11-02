@@ -1,0 +1,107 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-10-28-001-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'La revision semanal del AEC (2026-09-07) marco la afirmacion 9c756f4e
+      del grano 2026-07-02 como CAMBIADA: "Heroku queda descartado como opcion: desde
+      feb-2026 no acepta clientes nuevos (modo mantenimiento)". El claim es load-bearing
+      -- elimino a Heroku del tablero de la decision BACKEND del CRM multimarca --
+      y su referente pineado era un tutorial de terceros (learndjango.com), no la
+      fuente primaria. Hueco: (a) la restriccion de Heroku cubre a todo cliente nuevo
+      o solo a los contratos Enterprise, y (b) si ese estado se sostiene 51 dias despues
+      de la revision y 265 dias despues del anuncio original.
+
+      '
+    busqueda:
+    - Heroku new customers sign up status October 2026 sustaining engineering mode
+      update
+    - Heroku no longer accepting new customers maintenance mode 2026
+    resultados_crudos:
+    - fuente: heroku.com/blog/an-update-on-heroku
+      texto: both existing and new—can continue to use Heroku
+    - fuente: aquiva.com/blog/heroku-enterprise-end-of-sale-fy26
+      texto: Enterprise Account contracts are no longer sold to new customers
+    conclusion: 'El alcance del claim 9c756f4e es falso y su conclusion no se sostiene.
+      Heroku cerro el alta de contratos ENTERPRISE a clientes nuevos; la plataforma
+      self-serve (pago con tarjeta en el dashboard) sigue abierta a clientes nuevos,
+      y la fuente primaria lo dice con esas palabras: "both existing and new". Por
+      lo tanto "no acepta clientes nuevos" generaliza de mas, y "queda descartado
+      como opcion" es una conclusion que el referente primario no autoriza: descartar
+      Heroku del tablero BACKEND requiere otro argumento (p.ej. modo sostenimiento
+      sin features nuevas, o riesgo de EOL futuro), no este. El estado se sostiene
+      sin cambio al 2026-10-28: el post oficial sigue fechado "Last Updated: February
+      06, 2026" y no se ha anunciado fecha de End of Life de plataforma. Esta afirmacion
+      SUPERA a 9c756f4e; no la edita (log append-only). Riesgos aceptados y declarados:
+      (1) la lectura se hizo con WebFetch desde el contenedor nube, sin navegador
+      y por tanto SIN testigo de lectura -- los extractos son literales pero no puedo
+      probar que los bytes leidos sean los que el actor local re-bajara (pendiente
+      testigo_lectura); (2) heroku.com/blog es pagina viva y su plantilla reinyecta
+      fechas de otros posts en el sidebar: la captura local pineara la version; (3)
+      aquiva.com es fuente secundaria, usada solo para el alcance Enterprise, que
+      corrobora al primario.
+
+      '
+    inferidor:
+      model: estratega/claude-opus-5
+      ts: '2026-10-28T11:52:00-06:00'
+  necesidad:
+    pregunta: '¿Sigue Heroku cerrado al alta de clientes nuevos como afirma el claim
+      9c756f4e del grano 2026-07-02, o el cierre se limita a los contratos Enterprise
+      y la afirmacion debe ser superada antes de que pese en la decision BACKEND del
+      CRM multimarca?
+
+      '
+    gatillo: explicito:'procede' (sancion del Guardian a la propuesta del reporte
+      de revision semanal de emitir el grano que supera 9c756f4e, tras su orden 'verifica
+      si Heroku sigue sin acceso')
+    origen_nodo: decision:BACKEND-plataforma-CRM-multimarca
+  consultas:
+  - formulacion: Heroku new customers sign up status October 2026 sustaining engineering
+      mode update
+    referencias:
+    - local_id: r1
+      url: https://www.heroku.com/blog/an-update-on-heroku/
+      content_hash: 8800843a48863f43ead4198d1194b5b8514899ae652331e667e04543c6ba3b7b
+      capture_ts: '2026-11-02T08:42:57'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r2
+      url: https://aquiva.com/blog/heroku-enterprise-end-of-sale-fy26
+      content_hash: 1990f92c7c9cc69225d0a1692a5c0fd0facb263feeb6d39453526c974975afc5
+      capture_ts: '2026-11-02T08:42:57'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: 'Heroku sigue abierto a clientes nuevos por la via self-serve (tarjeta en
+      el dashboard): el anuncio oficial de feb-2026 dice "both existing and new".
+      El claim 9c756f4e ("no acepta clientes nuevos") es falso en su alcance y queda
+      superado.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: 'Lo que Heroku cerro a clientes nuevos son los contratos Enterprise Account,
+      no el alta de clientes; las suscripciones Enterprise existentes se honran y
+      pueden renovar.
+
+      '
+    tipo: claim
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i1
+  - txt: 'Heroku NO puede descartarse del tablero de la decision BACKEND del CRM multimarca
+      sobre la premisa "no acepta clientes nuevos"; su exclusion exige otro argumento
+      (modo sostenimiento sin features nuevas, riesgo de EOL no fechado). El tablero
+      de plataformas se re-abre con Heroku dentro como opcion evaluable.
+
+      '
+    tipo: decision
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
