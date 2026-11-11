@@ -1,0 +1,163 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-11-10-001-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'La linea de hardware necesita diagramas electricos de control industrial
+      (fuerza y escalera, simbologia NEMA) generados desde una descripcion en datos,
+      no dibujados a mano. Un primer generador propio (matplotlib) dibujaba geometria
+      sin semantica electrica. Hueco: que herramienta de terceros, con formato abierto,
+      permite generar el diagrama por script y conservar la conectividad, para no
+      reinventar la rueda.
+
+      '
+    busqueda:
+    - QElectroTech elements collection NEMA ANSI symbols .qet XML format
+    - Python generate KiCad schematic programmatically kicad-sch-api kiutils SKiDL
+      2026
+    resultados_crudos:
+    - fuente: github.com/qelectrotech/qelectrotech-source-mirror/wiki/faq
+      texto: are XML, so text editors can view/edit them
+    - fuente: github.com/qelectrotech/qelectrotech-source-mirror/wiki/cli_reference
+      texto: CSV electrical nets
+    - fuente: github.com/qelectrotech/qelectrotech-source-mirror/wiki/downloads
+      texto: for the 0.200.1 nightly
+    - fuente: github.com/qelectrotech/qelectrotech-source-mirror/wiki/mcp_server
+      texto: standard library only, no MCP SDK dependency
+    - fuente: github.com/qelectrotech/qelectrotech-elements (arbol 10_electric)
+      texto: 90_american_standards
+    - fuente: pypi.org/pypi/skidl/json (ficha de SKiDL 3.0.0)
+      texto: Generate netlists, XML BOMs, DOT graphs, or a placed-and-routed schematic
+    - fuente: kicad-sch-api.readthedocs.io/en/latest (doc 0.2.4)
+      texto: Electrical Rules Check (ERC) User Guide
+    conclusion: 'LECTURA. Para control industrial, QElectroTech (QET) es destino viable
+      de diagramas generados desde datos: su formato es XML y los simbolos viajan
+      dentro del proyecto. No trae simbologia NEMA util (hay que crearla). La automatizacion
+      sin ventana (exportar PDF, redes, materiales; scripting; servidor MCP) esta
+      documentada para la rama de desarrollo 0.200.1, no para la estable. Para electronica
+      (tarjetas), el ecosistema KiCad en Python (SKiDL, kicad-sch-api) cubre generacion
+      y verificacion. MEDIDO POR EJECUCION, no por lectura (no sale de las fuentes
+      citadas): la coleccion oficial clonada en el commit 7832b79 (2026-11-07) tiene
+      9026 .elmt y el directorio 90_american_standards contiene 4; un .qet generado
+      por script abrio en QET 0.9 (Ubuntu 24.04) y en 0.100.0 (Windows, verificado
+      por el Guardian) y conservo 40 redes, 9 enlaces y 34 rotulos tras abrir y volver
+      a guardar en 0.9; QET 0.9 no ofrece opciones de exportacion en su --help; la
+      rama master (commit 76b482d) no compilo con Qt 6.4. INFERIDO, no verificado:
+      que la exportacion por linea de comandos exista solo en 0.200.1 (se deduce de
+      la doc y de su ausencia en 0.9; en 0.100.0 no se probo). LIMITES DE PROCEDENCIA.
+      (1) r2 a r5 no fueron devueltas por el buscador: se alcanzaron navegando desde
+      los resultados de la consulta 1 (clon git de la wiki y del repositorio de simbolos)
+      y se re-capturaron por HTTP. (2) Las paginas de la wiki de GitHub mutan: el
+      FAQ que devolvio el buscador decia que los proyectos son .qet; la pagina viva
+      ya dice .qetz por defecto. Ventana de link-rot aceptada. (3) r6 se cita por
+      la API JSON de PyPI porque la pagina HTML del proyecto responde con un reto
+      de JavaScript a un cliente sin navegador. (4) De r7 solo se capturo el indice
+      de navegacion; el cuerpo de la pagina no se leyo completo.
+
+      '
+    inferidor:
+      model: estratega/claude-fable-5-2
+      ts: '2026-11-10T19:57:56-06:00'
+  necesidad:
+    pregunta: 'Que herramienta de terceros permite generar diagramas electricos (control
+      industrial NEMA y, aparte, electronica) desde una descripcion en datos, con
+      formato abierto y conectividad verificable, en vez de dibujarlos con codigo
+      propio.
+
+      '
+    gatillo: explicito:'emite los dos yamls'
+    origen_nodo: null
+  consultas:
+  - formulacion: QElectroTech elements collection NEMA ANSI symbols .qet XML format
+    referencias:
+    - local_id: r1
+      url: https://github.com/qelectrotech/qelectrotech-source-mirror/wiki/faq
+      content_hash: 10a0111dfef4a43968593c68c2429771206f22006f1d01c9a6b4e559b768219d
+      capture_ts: '2026-11-11T16:05:44'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r2
+      url: https://github.com/qelectrotech/qelectrotech-source-mirror/wiki/cli_reference
+      content_hash: d94f1f1b106335effb3dc699c0900a9ce68b71558fc2eb472d447746374be452
+      capture_ts: '2026-11-11T16:05:45'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r3
+      url: https://github.com/qelectrotech/qelectrotech-source-mirror/wiki/downloads
+      content_hash: 085ebb98d90d54e6d54ab2c8f8415c214a1d8e2c3ba21b3e7cf270af9c06f13a
+      capture_ts: '2026-11-11T16:05:46'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r4
+      url: https://github.com/qelectrotech/qelectrotech-source-mirror/wiki/mcp_server
+      content_hash: 2000c3f8abb5e1fce38cc1a000c505732d35a7fe021b76f807620f179d557a56
+      capture_ts: '2026-11-11T16:05:47'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r5
+      url: https://github.com/qelectrotech/qelectrotech-elements/tree/master/10_electric/90_american_standards
+      content_hash: a59b8fbb7bd4184a488f63a41373a4d5d1c36081381c6a05ab6b6eab44d95a87
+      capture_ts: '2026-11-11T16:05:49'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: Python generate KiCad schematic programmatically kicad-sch-api kiutils
+      SKiDL 2026
+    referencias:
+    - local_id: r6
+      url: https://pypi.org/pypi/skidl/json
+      content_hash: d033318f83cdc4ebd0356b99f25ca66d0928a2ed44e3e2797f51f1521f09aae0
+      capture_ts: '2026-11-11T16:05:49'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r7
+      url: https://kicad-sch-api.readthedocs.io/en/latest/
+      content_hash: 1b241644dbc10ce113791c7de492427dafd0e21a8c7d7691f61cfbc00761d13f
+      capture_ts: '2026-11-11T16:05:49'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: Los archivos de proyecto (.qet) y de simbolo (.elmt) de QElectroTech son
+      XML legible como texto; se pueden generar y comparar por script.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: La documentacion de linea de comandos de QElectroTech lista exportaciones
+      sin ventana, entre ellas la lista de redes electricas en CSV (--export-nets).
+    tipo: claim
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i1
+  - txt: QElectroTech distribuye una compilacion de desarrollo 0.200.1 portable, distinta
+      de la estable 0.100.0.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r3
+    inferida_por: i1
+  - txt: QElectroTech incluye en su arbol de fuentes un servidor MCP en Python de
+      biblioteca estandar para que un asistente lea y verifique proyectos.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r4
+    inferida_por: i1
+  - txt: La coleccion oficial de simbolos de QElectroTech tiene una categoria de normas
+      americanas casi vacia; la simbologia NEMA de control hay que crearla.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r5
+    inferida_por: i1
+  - txt: SKiDL 3.0.0 produce, desde una descripcion del circuito en Python, netlist,
+      lista de materiales y un esquematico colocado y ruteado.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r6
+    inferida_por: i1
+  - txt: kicad-sch-api (documentacion 0.2.4) documenta verificacion de reglas electricas
+      (ERC), analisis de conectividad y un servidor MCP sobre esquematicos KiCad.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r7
+    inferida_por: i1
