@@ -21,7 +21,7 @@ import unittest
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from aec_store import AecStore                   # noqa: E402
-from nube import consolidar                      # noqa: E402
+from nube import consolidar, embed_gemini, embed_missing   # noqa: E402
 
 
 # ---- conexion DB-API fake (espeja lo minimo: tx + ON CONFLICT de aec_log) ----
@@ -166,6 +166,8 @@ class Nube(unittest.TestCase):
         res = consolidar(self.aec, lambda: cx, embed_fn=None)
         self.assertEqual(res["embebidas"], 0)
         self.assertEqual(res["sin_embedding"], 1)
+        # NO silencioso: el id de la afirmacion sin vector sale nombrado (dir. 8/12)
+        self.assertEqual(res["ids_sin_embedding"], ["a1"])
         self.assertEqual(len(_sqls(cx, "UPDATE afirmacion SET embedding")), 0)
 
     def test_solo_lo_nuevo_se_proyecta(self):
@@ -182,6 +184,143 @@ class Nube(unittest.TestCase):
         self.assertEqual(res["afirmaciones_nuevas"], 1)
         ins_af = _sqls(cx2, "INSERT INTO afirmacion")
         self.assertEqual(len(ins_af), 1)
+
+
+# ---- reintento del embed: un flake transitorio NO debe dejar NULL (HANDOFF 2026-11-12) ----
+
+class EmbedReintento(unittest.TestCase):
+    def setUp(self):
+        self._key = os.environ.get("GEMINI_API_KEY")
+        os.environ["GEMINI_API_KEY"] = "k-de-prueba"   # pasar el gate permanente
+
+    def tearDown(self):
+        if self._key is None:
+            os.environ.pop("GEMINI_API_KEY", None)
+        else:
+            os.environ["GEMINI_API_KEY"] = self._key
+
+    def test_flake_transitorio_se_recupera(self):
+        llamadas = {"n": 0}
+
+        def flaky(text):
+            llamadas["n"] += 1
+            if llamadas["n"] < 3:
+                raise RuntimeError("503 transitorio")
+            return [0.1, 0.2]
+
+        out = embed_gemini("hola", attempt=flaky, retries=3, backoff=0)
+        self.assertEqual(out, [0.1, 0.2])
+        self.assertEqual(llamadas["n"], 3, "reintenta hasta exito")
+
+    def test_fallo_persistente_agota_y_devuelve_none(self):
+        llamadas = {"n": 0}
+
+        def siempre_falla(text):
+            llamadas["n"] += 1
+            raise RuntimeError("Gemini caido")
+
+        out = embed_gemini("hola", attempt=siempre_falla, retries=3, backoff=0)
+        self.assertIsNone(out)
+        self.assertEqual(llamadas["n"], 3, "agota exactamente los reintentos")
+
+    def test_fallo_permanente_sin_key_no_reintenta(self):
+        os.environ.pop("GEMINI_API_KEY", None)
+        llamadas = {"n": 0}
+
+        def no_deberia(text):
+            llamadas["n"] += 1
+            return [9.9]
+
+        out = embed_gemini("hola", attempt=no_deberia, retries=3, backoff=0)
+        self.assertIsNone(out)
+        self.assertEqual(llamadas["n"], 0, "sin key es permanente: no toca la red")
+
+    def test_texto_vacio_es_permanente(self):
+        out = embed_gemini("   ", attempt=lambda t: [1.0], retries=3, backoff=0)
+        self.assertIsNone(out)
+
+
+# ---- backfill embed_missing: solo-NULL, sin TRUNCATE, idempotente, reporta ids ----
+
+class _EmbCursor:
+    def __init__(self, db):
+        self.db = db
+        self._rows = []
+
+    def execute(self, sql, params=None):
+        if sql.startswith("SELECT id, txt FROM afirmacion WHERE embedding IS NULL"):
+            self._rows = [(i, t) for i, (t, emb) in self.db.rows.items() if emb is None]
+        elif sql.startswith("UPDATE afirmacion SET embedding"):
+            vec, af_id = params
+            t, emb = self.db.rows[af_id]
+            if emb is None:                        # AND embedding IS NULL -> idempotente/seguro
+                self.db.rows[af_id] = (t, vec)
+                self.db.updates += 1
+
+    def fetchall(self):
+        return self._rows
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+
+class FakeEmbCx:
+    """DB fake minima para embed_missing: afirmacion id -> (txt, embedding|None)."""
+    def __init__(self, rows):
+        self.rows = dict(rows)
+        self.updates = 0
+        self.closed = False
+
+    def cursor(self):
+        return _EmbCursor(self)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def close(self):
+        self.closed = True
+
+
+class EmbedMissing(unittest.TestCase):
+    def _rows(self):
+        return {"a1": ("uno", None), "a2": ("dos", "[0.1]"), "a3": ("tres", None)}
+
+    def test_rellena_solo_los_null(self):
+        cx = FakeEmbCx(self._rows())
+        res = embed_missing(lambda: cx, embed_fn=lambda t: [0.9])
+        self.assertEqual(res["candidatas"], 2, "solo a1 y a3 estaban NULL")
+        self.assertEqual(res["embebidas"], 2)
+        self.assertEqual(res["fallidas"], 0)
+        self.assertEqual(res["ids_fallidas"], [])
+        self.assertEqual(cx.rows["a2"][1], "[0.1]", "no toca el que ya tenia vector")
+        self.assertNotEqual(cx.rows["a1"][1], None)
+        self.assertTrue(cx.closed)
+
+    def test_idempotente_segunda_corrida_cero(self):
+        rows = self._rows()
+        cx = FakeEmbCx(rows)
+        embed_missing(lambda: cx, embed_fn=lambda t: [0.9])
+        cx2 = FakeEmbCx(cx.rows)                    # misma DB, re-corrida
+        res2 = embed_missing(lambda: cx2, embed_fn=lambda t: [0.9])
+        self.assertEqual(res2["candidatas"], 0, "ya no quedan NULL")
+        self.assertEqual(res2["embebidas"], 0)
+        self.assertEqual(cx2.updates, 0)
+
+    def test_fallo_parcial_reporta_ids(self):
+        cx = FakeEmbCx(self._rows())
+        res = embed_missing(lambda: cx,
+                            embed_fn=lambda t: None if t == "tres" else [0.5])
+        self.assertEqual(res["candidatas"], 2)
+        self.assertEqual(res["embebidas"], 1)
+        self.assertEqual(res["fallidas"], 1)
+        self.assertEqual(res["ids_fallidas"], ["a3"], "nombra el que fallo, no mudo")
+        self.assertIsNone(cx.rows["a3"][1], "el que fallo sigue NULL (no se inventa vector)")
 
 
 if __name__ == "__main__":

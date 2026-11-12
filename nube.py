@@ -36,6 +36,7 @@ Uso:
 from __future__ import annotations
 import os
 import sys
+import time
 import logging
 
 from exporta_log import iter_log_events, log_path_for
@@ -44,29 +45,66 @@ logger = logging.getLogger(__name__)
 
 EMBEDDING_MODEL = os.environ.get("EMBEDDING_MODEL", "gemini-embedding-001")
 EMBEDDING_DIM = int(os.environ.get("EMBEDDING_DIM", "1536"))
+# Reintentos ante flake transitorio de Gemini: un embedding NO debe quedar NULL
+# por un fallo pasajero de red/API (HANDOFF CodeAEC 2026-11-12). Env-overridable.
+EMBED_RETRIES = int(os.environ.get("EMBED_RETRIES", "3"))
+EMBED_BACKOFF = float(os.environ.get("EMBED_BACKOFF", "0.5"))   # segundos, base; crece 2^i
+
+
+def _ensure_tls() -> None:
+    """Norton (u otro MITM corporativo) intercepta TLS con su CA raiz, que vive en el
+    almacen de Windows pero NO en el bundle de Python -> urllib/google-genai revientan con
+    CERTIFICATE_VERIFY_FAILED. truststore hace que Python valide contra el almacen del SO.
+    Se antepone a CUALQUIER paso de red de este modulo (consolidar/embed_missing via CLI).
+    Idempotente y no-fatal: si truststore no esta, avisa y sigue (puede no haber MITM)."""
+    try:
+        import truststore
+        truststore.inject_into_ssl()
+    except Exception as e:                         # pragma: no cover - entorno-dependiente
+        logger.warning("truststore no disponible (%s); TLS sin fix de Norton", e)
 
 
 # ---- embeddings del escritor (mismo proveedor que el lector; degradacion elegante) ----
 
-def embed_gemini(text: str) -> list | None:
-    """Embedding RETRIEVAL_DOCUMENT via google-genai. None si no hay key/lib/texto.
-    Espejo de Ek-Chuah-mcp/embeddings.py (mismo modelo/dim env-overridable)."""
+def _embed_once(text: str) -> list:
+    """UN intento real contra Gemini. Lanza en cualquier fallo (lo maneja el reintento).
+    Factorizado para que `embed_gemini` pueda reintentar y los tests inyecten el intento."""
+    from google import genai
+    from google.genai import types
+    client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY", ""))
+    resp = client.models.embed_content(
+        model=EMBEDDING_MODEL, contents=text,
+        config=types.EmbedContentConfig(task_type="RETRIEVAL_DOCUMENT",
+                                        output_dimensionality=EMBEDDING_DIM))
+    return list(resp.embeddings[0].values)
+
+
+def embed_gemini(text: str, attempt=_embed_once,
+                 retries: int | None = None, backoff: float | None = None) -> list | None:
+    """Embedding RETRIEVAL_DOCUMENT via google-genai, con reintento + backoff.
+    None si no hay key/texto (fallo PERMANENTE: no se reintenta) o si agota reintentos
+    (fallo transitorio persistente: se avisa ruidoso, el caller lo contabiliza por id).
+    Espejo de Ek-Chuah-mcp/embeddings.py (mismo modelo/dim env-overridable).
+    `attempt`/`retries`/`backoff` inyectables para falsar el reintento sin red."""
     key = os.environ.get("GEMINI_API_KEY", "")
     text = (text or "").strip()
     if not key or not text:
-        return None
-    try:
-        from google import genai
-        from google.genai import types
-        client = genai.Client(api_key=key)
-        resp = client.models.embed_content(
-            model=EMBEDDING_MODEL, contents=text,
-            config=types.EmbedContentConfig(task_type="RETRIEVAL_DOCUMENT",
-                                            output_dimensionality=EMBEDDING_DIM))
-        return list(resp.embeddings[0].values)
-    except Exception as e:
-        logger.warning("Gemini embedding fallo: %s", e)
-        return None
+        return None                                # permanente: no hay nada que reintentar
+    retries = EMBED_RETRIES if retries is None else retries
+    backoff = EMBED_BACKOFF if backoff is None else backoff
+    last = None
+    for i in range(max(retries, 1)):
+        try:
+            return attempt(text)
+        except Exception as e:
+            last = e
+            if i < retries - 1:
+                logger.warning("Gemini embedding fallo (intento %d/%d): %s; reintento",
+                               i + 1, retries, e)
+                if backoff:
+                    time.sleep(backoff * (2 ** i))
+    logger.warning("Gemini embedding agoto %d reintentos: %s", retries, last)
+    return None
 
 
 # ---- proyeccion incremental de UN evento (espejo de projection_build, dialecto %s) ----
@@ -160,12 +198,14 @@ def consolidar(aec_root: str, connect, embed_fn=embed_gemini) -> dict:
                             af_nuevas.append((af_id, ev.get("txt", "")))
 
         embebidas = 0
+        fallidas_ids: list[str] = []               # ids que quedaron sin vector (dir. 8/12)
         if af_nuevas:
             with cx:
                 with cx.cursor() as cur:
                     for af_id, txt in af_nuevas:
                         emb = embed_fn(txt) if embed_fn else None
                         if not emb:
+                            fallidas_ids.append(af_id)   # NO silencioso: se reporta por id
                             continue
                         vec = "[" + ",".join(str(f) for f in emb) + "]"
                         cur.execute("UPDATE afirmacion SET embedding = CAST(%s AS vector) "
@@ -174,9 +214,47 @@ def consolidar(aec_root: str, connect, embed_fn=embed_gemini) -> dict:
     finally:
         cx.close()
 
-    sin_emb = len(af_nuevas) - (embebidas if af_nuevas else 0)
     return {"leidos": leidos, "nuevos": nuevos, "afirmaciones_nuevas": len(af_nuevas),
-            "embebidas": embebidas if af_nuevas else 0, "sin_embedding": max(sin_emb, 0)}
+            "embebidas": embebidas, "sin_embedding": len(fallidas_ids),
+            "ids_sin_embedding": fallidas_ids}
+
+
+# ---- backfill idempotente de embeddings NULL (espejo de projection_build --embed-missing) ----
+
+def embed_missing(connect, embed_fn=embed_gemini) -> dict:
+    """Rellena SOLO las afirmaciones con `embedding IS NULL`, SIN TRUNCATE (no tumba al
+    lector). Rompe la trampa del acoplamiento de `consolidar`: aqui la oportunidad de
+    embeddear depende de la AUSENCIA del vector, no de la novedad del evento en el log
+    -> re-correr SI repara un NULL que quedo de un cruce con Gemini caido (idempotente:
+    `AND embedding IS NULL` en el UPDATE lo hace seguro ante carreras y re-corridas).
+
+    Mantenimiento de indice: el embedding es regenerable (I1), excluido de dump_logico;
+    no aporta contenido al grafo ni cruza la membrana del log. connect/embed_fn inyectables.
+    Devuelve evidencia citable: candidatas/embebidas/fallidas (+ ids de las fallidas)."""
+    cx = connect()
+    candidatas: list = []
+    embebidas = 0
+    fallidas_ids: list[str] = []
+    try:
+        with cx:
+            with cx.cursor() as cur:
+                cur.execute("SELECT id, txt FROM afirmacion WHERE embedding IS NULL")
+                candidatas = list(cur.fetchall())
+        for af_id, txt in candidatas:
+            emb = embed_fn(txt) if embed_fn else None
+            if not emb:
+                fallidas_ids.append(af_id)
+                continue
+            vec = "[" + ",".join(str(f) for f in emb) + "]"
+            with cx:                               # una tx por fila: un fallo no pierde lo ya hecho
+                with cx.cursor() as cur:
+                    cur.execute("UPDATE afirmacion SET embedding = CAST(%s AS vector) "
+                                "WHERE id=%s AND embedding IS NULL", (vec, af_id))
+            embebidas += 1
+    finally:
+        cx.close()
+    return {"candidatas": len(candidatas), "embebidas": embebidas,
+            "fallidas": len(fallidas_ids), "ids_fallidas": fallidas_ids}
 
 
 def _connect_real(db_url: str):
@@ -193,19 +271,37 @@ def _main(argv=None):
     ap.add_argument("--aec", default="../AEC", help="raiz del durable WORM (default: ../AEC)")
     ap.add_argument("--db-url", default=os.environ.get("DATABASE_URL"),
                     help="DATABASE_URL del Postgres AEC (default: env DATABASE_URL)")
+    ap.add_argument("--embed-missing", action="store_true",
+                    help="backfill: rellena SOLO los embeddings NULL (sin TRUNCATE, idempotente); "
+                         "no cruza el log. Para reparar NULL que quedaron de un Gemini caido.")
     args = ap.parse_args(argv)
 
     if not args.db_url:
         print("[nube] ERROR: falta DATABASE_URL (o --db-url).", file=sys.stderr)
         return 2
 
+    _ensure_tls()                                  # Norton: fix TLS antes de tocar Gemini
+
+    if args.embed_missing:
+        res = embed_missing(_connect_real(args.db_url))
+        print(f"[nube] embed-missing: candidatas={res['candidatas']} "
+              f"embebidas={res['embebidas']} fallidas={res['fallidas']}")
+        if res["fallidas"]:
+            print(f"[nube] AVISO: {res['fallidas']} sin embedding tras reintentos. "
+                  f"FALLARON: {', '.join(res['ids_fallidas'])}. Re-corre --embed-missing "
+                  "(idempotente) cuando Gemini responda; ILIKE las ve mientras tanto.")
+            return 1
+        return 0
+
     res = consolidar(args.aec, _connect_real(args.db_url))
     print(f"[nube] leidos={res['leidos']} nuevos={res['nuevos']} "
-          f"afirmaciones_nuevas={res['afirmaciones_nuevas']} embebidas={res['embebidas']}")
+          f"afirmaciones_nuevas={res['afirmaciones_nuevas']} "
+          f"embebidas={res['embebidas']} de {res['afirmaciones_nuevas']}")
     if res["sin_embedding"]:
-        print(f"[nube] AVISO: {res['sin_embedding']} afirmacion(es) sin embedding "
-              "(sin GEMINI_API_KEY?). La busqueda embedding no las vera hasta un "
-              "rebuild con embeddings; ILIKE si las ve.")
+        print(f"[nube] AVISO: {res['sin_embedding']} afirmacion(es) sin embedding tras "
+              f"reintentos. FALLARON: {', '.join(res['ids_sin_embedding'])}. "
+              "Corre 'python nube.py --embed-missing' para rellenarlas (idempotente, "
+              "solo-NULL); la busqueda ILIKE si las ve mientras tanto.")
     return 0
 
 
