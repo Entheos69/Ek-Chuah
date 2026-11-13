@@ -1,0 +1,135 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-11-12-001-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'El Taller necesita reconstruir circuitos de placas existentes (ingenieria
+      inversa). Hay un modulo automotriz de puerta desarmado como primer caso y el
+      banco tiene microscopio digital y multimetro, sin osciloscopio ni rayos X. El
+      piso ya sabe ir de redes a esquematico (escritor propio de KiCad 10). Hueco:
+      que herramientas de terceros existen para ir de fotos de la placa a una lista
+      de redes, y cuanto de ese camino es automatico.
+
+      '
+    busqueda:
+    - PCB reverse engineering software photos to schematic open source
+    - KiCad PCB editor reference image reverse engineering board photo trace netlist
+      workflow
+    resultados_crudos:
+    - fuente: forum.kicad.info, hilo 71412 (2026-08-28), testimonio de usuario
+      texto: it does support back annotation from PCB to schema
+    - fuente: pcbtracer.com, leido a traves de un lector (hn.jakechampion.name)
+      texto: generate KiCad-compatible schematic files from your annotated PCB data
+    - fuente: github.com/voneiden/cirdis
+      texto: load pre-aligned images and trace out the PCB features
+    - fuente: github.com/ericrihm/retrace
+      texto: Demo uses synthetic PCB renders with verified real-world component data
+    conclusion: 'LECTURA. No aparecio ninguna herramienta madura que vaya sola de
+      la foto al esquematico. El camino que la gente usa de verdad es manual: fotos
+      alineadas de ambas caras como fondo, trazado de pads y conexiones encima, y
+      el multimetro para confirmar. KiCad ya lo permite sin instalar nada: imagen
+      de referencia en el editor de placa, asignacion de redes a pads y retro-anotacion
+      al esquematico. Dos herramientas de navegador (PCB Tracer, Cirdis) hacen ese
+      trazado manual con mas comodidad; PCB Tracer ademas exporta una lista de redes
+      en JSON y un esquematico KiCad en beta. La unica propuesta automatica hallada
+      (retrace) se demuestra con imagenes sinteticas. Las fotos por si solas no alcanzan
+      en placas de cuatro capas: hace falta rayos X o mucha continuidad con multimetro.
+      NO PROBADO. Nada de esto se ejecuto. Es lectura de paginas, no verificacion.
+      INFERIDO POR EL ESTRATEGA (no sale de las fuentes): la ruta que mejor encaja
+      con el piso del Taller es trazar en el KiCad 10.0.8 ya instalado y extraer las
+      redes del archivo de placa con herramienta propia, o capturar las redes como
+      datos, y dibujar con el escritor propio; la continuidad medida seria el juez.
+      No esta decidido. LIMITES. (1) El hilo del foro es testimonio de un usuario
+      sobre una placa, no documentacion; la mejora de KiCad 10 la afirma otro usuario
+      en una respuesta. (2) De PCB Tracer no se sabe que datos salen de la maquina
+      al usar sus funciones de IA; la pagina dice a la vez que corre local en el navegador.
+      Se leyo por un lector porque el buscador devolvio esa direccion; el original
+      es pcbtracer.com. (3) El buscador devolvio Cirdis por una direccion de redireccion;
+      se cita el repositorio canonico. (4) La pagina de retrace cambio entre el resultado
+      del buscador y la lectura viva (decia "images", hoy dice "renders"). (5) No
+      se sabe cuantas capas tiene el modulo de puerta; de eso depende cuanto sirve
+      la foto. (6) De las fuentes leidas por pagina se capturo un fragmento, no los
+      bytes completos.
+
+      '
+    inferidor:
+      model: estratega/claude-fable-5-2
+      ts: '2026-11-12T18:25:06-06:00'
+  necesidad:
+    pregunta: 'Que herramientas existen para reconstruir la lista de redes y el esquematico
+      de una placa a partir de fotos y mediciones de continuidad, y cuanto de ese
+      camino es automatico.
+
+      '
+    gatillo: explicito:'necesitamos explorar las herramientas de ingenieria inversa
+      sobre circuiteria'
+    origen_nodo: null
+  consultas:
+  - formulacion: PCB reverse engineering software photos to schematic open source
+    referencias:
+    - local_id: r3
+      url: https://github.com/voneiden/cirdis
+      content_hash: 9a38c8812412a586bc6a61083103a35d0fd9dd9f364d67ae1b999512ddc9816a
+      capture_ts: '2026-11-13T12:14:43'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r4
+      url: https://github.com/ericrihm/retrace
+      content_hash: ef6054dd5082e0649fa65adf9e6036c0050d0d4677192d6aea894541f1774970
+      capture_ts: '2026-11-13T12:15:11'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: KiCad PCB editor reference image reverse engineering board photo
+      trace netlist workflow
+    referencias:
+    - local_id: r1
+      url: https://forum.kicad.info/t/impressions-of-reverse-engineering-in-kicad/71412
+      content_hash: 547f9e87f942c1b657fe94b2ec09455182a0756d16f77563dcdb51434a0c7fc3
+      capture_ts: '2026-11-13T12:14:57'
+      fecha_fuente: '2026-08-28'
+      estatus: viva
+    - local_id: r2
+      url: https://hn.jakechampion.name/reader/https://pcbtracer.com
+      content_hash: bf71da50a1b9fd0395a881fb791f084f6b924cdf94d7c74a0eaa3450c00d938a
+      capture_ts: '2026-11-13T12:15:01'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: KiCad permite poner fotos de la placa como imagen de referencia en el editor
+      de placa, asignar redes a los pads y retro-anotar al esquematico; un usuario
+      lo reporta como metodo de ingenieria inversa que le funciono, con unos tres
+      dias de trabajo para asignar las redes de una placa.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: 'Segun usuarios del foro de KiCad, en una placa de cuatro capas las fotos
+      no bastan: se necesita rayos X o mucha prueba de continuidad con multimetro.'
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: PCB Tracer es una herramienta de navegador para trazar pistas, vias, pads
+      y componentes sobre fotos de ambas caras; mantiene un modelo de conexiones y
+      exporta una descripcion del circuito en JSON y un esquematico KiCad en beta;
+      varias funciones dependen de IA.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i1
+  - txt: Cirdis es una herramienta de trazado manual para placas de una o dos caras
+      sobre imagenes ya alineadas.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r3
+    inferida_por: i1
+  - txt: retrace ofrece deteccion automatica de componentes y pistas desde una foto
+      y exporta netlist de KiCad, pero su demostracion usa imagenes sinteticas, no
+      fotos de placas reales.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r4
+    inferida_por: i1
