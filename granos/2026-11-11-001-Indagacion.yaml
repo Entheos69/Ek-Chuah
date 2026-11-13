@@ -1,0 +1,110 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-11-11-001-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'Resuelta la diagramacion de control industrial con QElectroTech, la
+      linea de hardware necesita el mismo patron (circuito como datos -> plano verificable)
+      para esquematicos de microcontroladores y electronica de control en KiCad 10.
+      Hueco: que camino existe en KiCad 10 para generar un .kicad_sch por script y
+      verificarlo con el propio programa, y si las bibliotecas de terceros (SKiDL,
+      kicad-sch-api) sirven para esa version.
+
+      '
+    busqueda:
+    - KiCad 10.0 release new features schematic kicad-cli IPC API
+    - kicad.org KiCad 10.0.0 release announcement schematic editor new features
+    resultados_crudos:
+    - fuente: kicad.org/blog/2026/03/Version-10.0.0-Released (anuncio oficial, 2026-03-20)
+      texto: proud to announce the release of Version 10
+    - fuente: github.com/nevenfo/kicad-agentic-mcp/releases (proyecto de terceros)
+      texto: schematic IPC is empty on 10.0
+    - fuente: github.com/BackplaneWorks/Backplane_KiCad/releases (runtime derivado)
+      texto: Native files remain compatible with stock KiCad 10.0.6
+    conclusion: 'LECTURA. KiCad 10 es version estable desde 2026-03-20. Segun un proyecto
+      de terceros, en la 10.0 la interfaz de programacion (IPC) no ofrece comandos
+      para esquematicos: el camino para generar un esquematico es escribir el archivo
+      de expresiones S y validarlo con kicad-cli. Ese camino funciona y quedo verificado
+      de punta a punta. MEDIDO POR EJECUCION (no sale de las fuentes citadas). (a)
+      SKiDL 3.0.0 trae herramienta KICAD10 y lee las bibliotecas 10.0.6; su ERC y
+      su netlist son correctos (10 redes segun kicad-cli), pero su esquematico automatico
+      no es presentable (RoutingFailure; con auto_stub apila piezas). (b) kicad-sch-api
+      0.5.6 escribe formato 20250114 (KiCad 9), gira los simbolos a 90/270 al reves
+      que KiCad (diodo invertido, resistencia en corto, detectado por la netlist de
+      kicad-cli), no lee carpetas .kicad_symdir, pierde atributos de simbolos de KiCad
+      10 y escribe solo dos de los cinco campos por pieza. Su ficha en PyPI declara
+      archivos para KiCad 7/8 (leido alli, no citado como referencia porque no vino
+      de estas consultas). (c) Las bibliotecas oficiales 10.0.6 vienen como carpetas
+      .kicad_symdir, un archivo por simbolo. (d) Un escritor propio en formato 20260306,
+      con simbolos copiados literalmente de la biblioteca, produjo un esquematico
+      cuyos 12 simbolos incrustados son identicos nodo por nodo a los que guardo KiCad
+      10.0.8. VERIFICADO POR EL GUARDIAN en KiCad 10.0.8 de serie (Windows): ese archivo
+      abre sin aviso de version, kicad-cli da 0 violaciones de ERC y la netlist exportada
+      coincide con las redes propias (10 de 10); regenerarlo con la biblioteca 10.0.8
+      da un archivo identico byte a byte. LIMITES. (1) La afirmacion sobre la IPC
+      es de un tercero; no se contrasto con el codigo de KiCad. (2) Mi kicad-cli fue
+      10.99.0 de un runtime derivado no oficial (Backplane bp.8), solo en entorno
+      aislado; el buscador devolvio ese repositorio bajo su dueno anterior (i2cjak)
+      y hoy redirige a BackplaneWorks. (3) Las paginas de releases de GitHub mutan
+      con cada publicacion: ventana de link-rot aceptada. (4) Del anuncio de kicad.org
+      se capturo un fragmento por lectura de pagina, no los bytes completos.
+
+      '
+    inferidor:
+      model: estratega/claude-fable-5-2
+      ts: '2026-11-11T15:59:15-06:00'
+  necesidad:
+    pregunta: 'Que camino hay en KiCad 10 para generar esquematicos desde una descripcion
+      en datos y verificarlos con el propio programa, y si las bibliotecas de terceros
+      existentes sirven para esa version.
+
+      '
+    gatillo: explicito:'emite el sedimento y el grano AEC'
+    origen_nodo: null
+  consultas:
+  - formulacion: KiCad 10.0 release new features schematic kicad-cli IPC API
+    referencias:
+    - local_id: r1
+      url: https://github.com/nevenfo/kicad-agentic-mcp/releases
+      content_hash: 88cf2644f73c243fb06d954e6c2356217ec5aac030045af64c72871ec626f930
+      capture_ts: '2026-11-11T16:05:54'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r3
+      url: https://github.com/BackplaneWorks/Backplane_KiCad/releases
+      content_hash: bff199ced13832f75287576a673da090fecfab272b98fead072d587f122cfc69
+      capture_ts: '2026-11-11T16:05:54'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: kicad.org KiCad 10.0.0 release announcement schematic editor new
+      features
+    referencias:
+    - local_id: r2
+      url: https://www.kicad.org/blog/2026/03/Version-10.0.0-Released/
+      content_hash: 7ae8fbd5fe40b1428b2185d7152febd3f6145f54d6e516ea2163c51a12af34de
+      capture_ts: '2026-11-11T16:05:55'
+      fecha_fuente: '2026-03-20'
+      estatus: viva
+  afirmaciones:
+  - txt: KiCad 10.0.0 se publico como version estable el 2026-03-20.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i1
+  - txt: Segun un proyecto de terceros, en KiCad 10.0 la interfaz IPC no ofrece comandos
+      para esquematicos; la via para generarlos es el archivo de expresiones S, con
+      kicad-cli para validar.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: Existe un runtime derivado de KiCad para Linux (Backplane) con kicad-cli
+      que declara compatibilidad de archivos con KiCad 10.0.6 de serie; sirve como
+      verificador en un entorno sin KiCad oficial.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r3
+    inferida_por: i1

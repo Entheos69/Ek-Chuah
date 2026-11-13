@@ -403,6 +403,7 @@ def _main(argv=None):
                   "(idempotente, se auto-repara).")
             return 1
         import nube
+        nube._ensure_tls()                         # Norton: fix TLS antes de tocar Gemini
         try:
             rn = nube.consolidar(args.aec, nube._connect_real(db_url))
         except Exception as e:
@@ -410,9 +411,11 @@ def _main(argv=None):
                   "re-corre con --nube o 'python nube.py' (idempotente, se auto-repara).")
             return 1
         print(f"NUBE OK: nuevos={rn['nuevos']} afirmaciones_nuevas={rn['afirmaciones_nuevas']} "
-              f"embebidas={rn['embebidas']} -> visible en el lector")
+              f"embebidas={rn['embebidas']} de {rn['afirmaciones_nuevas']} -> visible en el lector")
         if rn["sin_embedding"]:
-            print(f"  AVISO: {rn['sin_embedding']} sin embedding (busqueda ILIKE si las ve)")
+            print(f"  AVISO: {rn['sin_embedding']} sin embedding tras reintentos. "
+                  f"FALLARON: {', '.join(rn['ids_sin_embedding'])}. Corre "
+                  "'python nube.py --embed-missing' para rellenarlas; ILIKE las ve mientras.")
     elif os.environ.get("DATABASE_URL"):
         print("HINT: DATABASE_URL presente; agrega --nube para que el grano sea visible "
               "en el lector al instante (B realineado).")

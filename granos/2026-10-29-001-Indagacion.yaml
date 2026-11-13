@@ -1,0 +1,118 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-10-29-001-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'La pasada de hardening "Black October 2026" de INDUCOP (incidente Railway
+      20-22 oct + CVE Brotli) necesitaba confirmar la PROFUNDIDAD real de la fuga
+      de los secretos confiados a Railway, las medidas de remediacion recomendadas,
+      y si el incidente justifica cambiar de prestador de PaaS.
+
+      '
+    busqueda:
+    - Railway.app security incident October 2026 environment variables exposure customer
+      secrets postmortem
+    - Railway breach 2026 decrypted secrets recommended remediation rotate credentials
+      advisory
+    - Railway PaaS alternatives 2026 Render Fly.io Heroku security comparison after
+      incident
+    resultados_crudos:
+    - fuente: blog.railway.com (reporte preliminar oficial, 22-oct-2026)
+      texto: a subset were decrypted utilizing a combination of the compromised credentials
+    - fuente: blog.gitguardian.com (22-oct-2026)
+      texto: Treat every secret stored in Railway as at risk until investigated.
+    - fuente: aicybr.com (25-oct-2026, tercero)
+      texto: It recommends rotating sensitive credentials stored by customers who
+        signed up before October 21.
+    conclusion: 'La fuga alcanzo VALORES DESCIFRADOS de un subconjunto de env vars
+      (no solo cifrado en reposo), via credenciales comprometidas; techo <=1.85% de
+      workspaces (~100k), no conteo confirmado. Railway invalido sus API tokens, regenero
+      credenciales de bucket y coordino revocacion con proveedores (incl. Anthropic)
+      -- lo que explica por que la ANTHROPIC_API_KEY de INDUCOP llego muerta. Remediacion
+      de consenso: rotar TODO secreto almacenado en Railway (no solo victimas). Sobre
+      cambiar de prestador: el incidente por si solo NO es razon decisiva (toda PaaS
+      con secretos tiene la clase de riesgo; Railway respondio razonablemente); la
+      palanca de mayor valor es reducir el blast-radius de los secretos (secrets-manager
+      externo / BYOC) en cualquier PaaS. NOTA: la dimension de prestadores se apoya
+      en comparativas secundarias leidas a nivel busqueda, menos rigurosa que los
+      hechos del incidente; se deja como lectura, no como afirmacion anclada. Las
+      citas llegaron via WebFetch: el content_hash de la materializacion local es
+      la captura autoritativa.
+
+      '
+    inferidor:
+      model: code/claude-opus-4-8
+      ts: '2026-10-29T18:44:00-06:00'
+  necesidad:
+    pregunta: 'Cual fue la profundidad real de la fuga del incidente Railway (oct
+      2026) sobre los secretos confiados a Railway, que remediacion se recomienda,
+      y amerita cambiar de prestador?
+
+      '
+    gatillo: explicito:'ve a la web y confirma la profundidad de la fuga en Railway
+      y las medidas recomendadas. Explora la necesidad de cambiar de prestador' +
+      'crea el grano correspondiente' + 'Redactalo tu, opcion i'
+    origen_nodo: null
+  consultas:
+  - formulacion: Railway.app security incident October 2026 environment variables
+      exposure customer secrets postmortem
+    referencias:
+    - local_id: r1
+      url: https://blog.railway.com/p/preliminary-report-october-security-incident
+      content_hash: 2459b7dac0f7269df4808fdae2e4e01b6efb1b6116cf0e24a4b44fb05341a8e7
+      capture_ts: '2026-11-02T08:43:01'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r2
+      url: https://blog.gitguardian.com/railway-october-2026-incident-environment-variables/
+      content_hash: aceece89693c3b82f69219a916f99741d19c5563ebd0ffad5143ddd2081ba6a7
+      capture_ts: '2026-11-02T08:43:01'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: Railway breach 2026 decrypted secrets recommended remediation rotate
+      credentials advisory
+    referencias:
+    - local_id: r3
+      url: https://aicybr.com/blog/railway-october-2026-secrets-exposure-key-rotation-recovery
+      content_hash: 369c8655298a971ca75563d36a0c5bdbd8a0dd007042f94a614bb22a73ecdd66
+      capture_ts: '2026-11-02T08:43:02'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: La fuga de Railway alcanzo valores DESCIFRADOS de un subconjunto de env vars,
+      no solo cifrado en reposo.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: 'Alcance techo: <=1.85% de los workspaces (~100k), no un conteo confirmado.'
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: 'Remediacion oficial: revocar y reaplicar (rotar) todos los secretos sensibles
+      almacenados en Railway.'
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: Railway coordino revocacion con proveedores (GitHub, GitLab, Anthropic, OpenAI,
+      OpenRouter, Stripe), lo que explica la ANTHROPIC_API_KEY muerta de INDUCOP.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: 'Consenso externo de seguridad: tratar todo secreto almacenado en Railway
+      como en riesgo hasta investigar.'
+    tipo: claim
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i1
+  - txt: La rotacion recomendada aplica a clientes registrados antes del 21-oct-2026.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r3
+    inferida_por: i1
