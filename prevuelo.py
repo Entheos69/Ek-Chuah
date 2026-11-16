@@ -30,7 +30,7 @@ import urllib.error
 import urllib.request
 
 from ingesta import ROOT_KEY
-from materializa_orden import PLACEHOLDER, _pendiente
+from materializa_orden import PLACEHOLDER, _pendiente, BROWSER_UA
 
 # estados de un sondeo
 OK = "OK"
@@ -44,13 +44,14 @@ BLOQUEANTE = "BLOQUEANTE"
 AVISO = "AVISO"
 
 
-def _probe_urllib(url: str, timeout: int = 12) -> tuple:
+def _probe_urllib(url: str, timeout: int = 20) -> tuple:
     """Sondeo real read-only AUTORITATIVO: baja el cuerpo completo (acotado por timeout)
     para detectar tanto el host que no resuelve como el que sirve un 200 y se CUELGA a
     mitad de la respuesta (challenge anti-bot). Leer solo un trozo daria falsos OK a esos
     hosts. NO escribe en WORM (esa es la diferencia con el paso 2): mismo trabajo de red,
-    cero durable. Devuelve (estado, detalle)."""
-    req = urllib.request.Request(url, headers={"User-Agent": "ek-chuah-prevuelo/1"})
+    cero durable. Usa el MISMO UA de navegador que el paso 2 (BROWSER_UA) para que el
+    criterio de alcance coincida. Devuelve (estado, detalle)."""
+    req = urllib.request.Request(url, headers={"User-Agent": BROWSER_UA})
     try:
         with urllib.request.urlopen(req, timeout=timeout) as r:
             r.read()                           # cuerpo completo: revienta si el host se cuelga
