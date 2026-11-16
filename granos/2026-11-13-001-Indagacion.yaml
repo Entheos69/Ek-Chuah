@@ -1,0 +1,55 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-11-13-001-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'Indagacion del patillaje y topologia interna del relevador gemelo automotriz
+      NEC/TOKIN EX2-2U1S empleado en modulos de puerta de tractocamion Kenworth T600/T800/T660.
+
+      '
+    busqueda:
+    - '"NEC" "EX2-2U1S" OR "EX2 series" relay datasheet pinout'
+    - '"EX2-2U1" "Terminal Arrangement" OR "Schematics (Bottom view)" OR "PC board
+      layout"'
+    resultados_crudos:
+    - fuente: em-devices.com (EX2 Series Datasheet)
+      texto: Automotive Power Twin Relay 2 Form C SPDT x 2
+    - fuente: tme.eu (NEC EX2 series technical catalog)
+      texto: Twin relay comprising two separate units 1c x 2
+    conclusion: 'El componente integra dos unidades SPDT con asimetria mecanica a
+      180 grados: Unidad A tiene COM en pin 1 (inferior) y platinos en 4 NC / 5 NO
+      (superiores); Unidad B tiene COM en pin 6 (superior) y platinos en 10 NC / 9
+      NO (inferiores). Las bobinas de 160 Ohm estan escalonadas: Bobina A (2-3) en
+      posicion baja y Bobina B (7-8) en posicion alta, sirviendo de ancla fisica de
+      orientacion.
+
+      '
+    inferidor:
+      model: antigravity/gemini-flash
+      ts: '2026-11-13T19:10:00'
+  necesidad:
+    pregunta: Cual es el patillaje exacto y disposicion de contactos internos del
+      relevador NEC/TOKIN EX2-2U1S
+    gatillo: explicito:'puedes conseguir el pateo del relevador Nec/tokin EX2 - 2UIS'
+    origen_nodo: null
+  consultas:
+  - formulacion: '"NEC" "EX2-2U1S" OR "EX2 series" relay datasheet pinout'
+    referencias:
+    - local_id: r1
+      url: https://www.piekarz.pl/pdf/44269
+      content_hash: 11b830ca1d85a3e905078c6d7d8cee3114e5212c4e2e98f5cb2f6d93d4da4834
+      capture_ts: '2026-11-16T09:52:13'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: 'El relevador gemelo automotriz NEC/TOKIN EX2-2U1S posee configuracion asimetrica
+      interna de 10 pines THT: Unidad A con COM en pin 1 y NC/NO en pines 4/5; Unidad
+      B invertida con COM en pin 6 y NC/NO en pines 10/9; bobinas de 160 Ohm escalonadas
+      fisicamente (2-3 inferior, 7-8 superior).'
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
