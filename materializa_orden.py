@@ -28,10 +28,19 @@ from ingesta import ROOT_KEY
 
 PLACEHOLDER = "MATERIALIZAR"
 
+# UA de navegador. Varios hosts canonicos (digikey, st.com, fabricantes) responden 403 o
+# cuelgan la conexion ante un cliente que no se presenta como navegador; con esto bajan la
+# roca real. NO afecta ninguna identidad: el content_hash se calcula sobre los BYTES de la
+# respuesta, no sobre el UA. prevuelo.py REUSA esta constante (import) para que el sondeo del
+# pre-flight y la descarga del paso 2 apliquen el MISMO criterio de alcance: si difirieran, el
+# prevuelo daria OK y el paso 2 fallaria (o al reves). Fuente unica -> sin drift.
+BROWSER_UA = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+              "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
 
-def _fetch_urllib(url: str, timeout: int = 30) -> bytes:
+
+def _fetch_urllib(url: str, timeout: int = 45) -> bytes:
     """Descarga real (la corre el actor local con web: Guardian / IA-aux). file:// tambien sirve."""
-    req = urllib.request.Request(url, headers={"User-Agent": "ek-chuah-materializador/1"})
+    req = urllib.request.Request(url, headers={"User-Agent": BROWSER_UA})
     with urllib.request.urlopen(req, timeout=timeout) as r:
         return r.read()
 

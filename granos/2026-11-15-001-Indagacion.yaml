@@ -1,0 +1,228 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-11-15-001-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'El proyecto modulo_puerta (Taller) viro a un modulo sustituto con MCU.
+      Falta elegir el driver del puente H del motor elevavidrios (estado solido con
+      sensado de corriente) y decidir si el puente del seguro sigue con relevador
+      o pasa a estado solido. El Guardian establecio que la cabina es de 12 V; la
+      corriente del motor no esta medida, por lo que se buscan candidatos en dos escalones
+      de corriente. La premisa comercial a contrastar es que el relevador en lote
+      chico es dificil y caro.
+
+      '
+    busqueda:
+    - automotive integrated full H-bridge motor driver current sense window lift 30A
+      VNH7040 VNH7070 datasheet
+    - TI DRV8245-Q1 DRV8243-Q1 automotive H-bridge driver integrated current sense
+      window lift datasheet
+    - Infineon BTN9970LV BTN9990LV half-bridge NovalithIC+ current sense window lift
+      datasheet
+    - NXP MC33HB2002 H-bridge 10 A automotive current feedback door lock datasheet
+    - DRV8245SQPWPRQ1 price stock Digi-Key Mouser
+    - VNH7040AYTR price stock Mouser Digi-Key
+    - KEMET EX2-2U1S twin relay automotive 12V coil datasheet contact rating price
+    - VNH7070ASTR Digi-Key price in stock
+    - DRV8243HQDGQRQ1 Digi-Key price in stock
+    resultados_crudos:
+    - fuente: st.com (ficha VNH7040AY)
+      texto: 'Output current: 35 A'
+    - fuente: st.com (hoja de datos VNH7070AS, DocID028088 Rev 5)
+      texto: PWM operation up to 20 kHz
+    - fuente: ti.com (hoja de datos DRV8245-Q1, SLVSFJ1E)
+      texto: 4.5V to 35V (40V abs. max) operating range
+    - fuente: ti.com (ficha DRV8243-Q1)
+      texto: Integrated current sense (eliminates shunt resistor)
+    - fuente: infineon.com (ficha BTN9970LV)
+      texto: Supply Voltage range 8 V to 18 V
+    - fuente: digikey.co.uk (EX2-2U1S)
+      texto: Automotive Relay SPDT (1 Form C) x 2 12VDC Coil Through Hole
+    - fuente: digikey.com (DRV8245SQPWPRQ1)
+      texto: Bipolar, Unipolar Motor Driver Power MOSFET PWM, SPI 28-HTSSOP
+    - fuente: digikey.com (VNH7040AYTR)
+      texto: Motor Driver Power MOSFET PWM PowerSSO-36 TP
+    - fuente: digikey.com (VNH7070ASTR)
+      texto: Motor Driver Power MOSFET PWM 16-SO
+    conclusion: 'Lectura del 2026-11-15, no hecho. (1) Para cabina de 12 V hay tres
+      familias vigentes de puente H con sensado de corriente integrado: ST VNH7 (VNH7040AY
+      35 A, VNH7070AS 15 A, 4-28 V de operacion, 38 V maximo), TI DRV824x-Q1 (DRV8245
+      32 A, DRV8243 12 A, 4.5-35 V, 40 V maximo, con modelo PSpice) e Infineon BTN99x0LV
+      (medio puente, se usan dos, 8-18 V). Ninguna cubre un sistema de 24 V con su
+      load dump. (2) El relevador doble EX2-2U1S del modulo original tiene bobina
+      de 12 VCD y contactos de 30 A: es evidencia de que el modulo opera a 12 V y
+      da la cota de corriente que el original soportaba. (3) La premisa comercial
+      se invierte en el dia de la captura: el relevador se vende por unidad (~2.8
+      GBP) con miles en existencia, mientras los TI estaban agotados con 26 semanas
+      de plazo y los ST, aunque con existencia, declaran 99 semanas de plazo de fabrica.
+      Precios, existencias y plazos son volatiles (re-verificar pasados 45 dias).
+      La pagina de Infineon se alcanzo por un enlace de redireccion, con riesgo de
+      link-rot. No se obtuvo el numero de revision de la hoja de datos del VNH7040AY
+      (st.com no permitio bajar el PDF) ni la hoja del MC33HB2002 de NXP, que queda
+      sin caracterizar.
+
+      '
+    inferidor:
+      model: estratega/claude-fable-5-2
+      ts: '2026-11-15T16:17:26'
+  necesidad:
+    pregunta: 'Que circuitos integrados de puente H con sensado de corriente, vigentes
+      y de grado automotriz, sirven para el motor elevavidrios de un modulo de puerta
+      de 12 V, y como se compara en disponibilidad y costo un relevador automotriz
+      doble por unidad frente a resolver tambien el seguro con estado solido.
+
+      '
+    gatillo: 'explicito:''procede'' (Guardian, 2026-11-15, sobre la SOL de CodeTaller
+      ''Terna de drivers para el puente H del motor elevavidrios'' con el alcance
+      propuesto por el Estratega: terna de 12 V en dos escalones, comparativo del
+      seguro, grano al cierre)'
+    origen_nodo: null
+  consultas:
+  - formulacion: automotive integrated full H-bridge motor driver current sense window
+      lift 30A VNH7040 VNH7070 datasheet
+    referencias:
+    - local_id: r1
+      url: https://cdn.eicom.ru/media/PDF/3638158.pdf
+      content_hash: b97793887a90b9552dafc9cb12eeaad221be2db900667acaab7b2efd0b815749
+      capture_ts: '2026-11-16T09:55:07'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r2
+      url: https://store.comet.bg/download-file.php?id=31462
+      content_hash: dd02bacb7e63e6dfcff74de627ed024eedcf110093261490cb0f90b2eed25ce2
+      capture_ts: '2026-11-16T09:55:08'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: TI DRV8245-Q1 DRV8243-Q1 automotive H-bridge driver integrated current
+      sense window lift datasheet
+    referencias:
+    - local_id: r3
+      url: https://www.ti.com/lit/gpn/drv8245-q1
+      content_hash: ef9b9567d4c2ffedbea2314f79650adc08b3beb39523808d7f5b351a89096c85
+      capture_ts: '2026-11-16T09:55:10'
+      fecha_fuente: capture
+      estatus: viva
+    - local_id: r4
+      url: https://www.ti.com/product/DRV8243-Q1
+      content_hash: 0ea1b0e91f75ed62eca74ffb34857612e457c24bc98643509074742e6a1ab602
+      capture_ts: '2026-11-16T09:55:11'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: Infineon BTN9970LV BTN9990LV half-bridge NovalithIC+ current sense
+      window lift datasheet
+    referencias:
+    - local_id: r5
+      url: https://www.infineon.com/api/redirect/ispn/BTN9970LV
+      content_hash: e23343accd3517689016cfed14298f2566d438f641063204be58d3e238a70b4a
+      capture_ts: '2026-11-16T09:55:12'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: KEMET EX2-2U1S twin relay automotive 12V coil datasheet contact rating
+      price
+    referencias:
+    - local_id: r6
+      url: https://www.digikey.co.uk/product-detail/en/kemet/EX2-2U1S/10515692
+      content_hash: 22496502aec80eca98565e22182fea8eae1b56a5dc8cf28d1ce250493d8cd8a6
+      capture_ts: '2026-11-16T09:55:14'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: DRV8245SQPWPRQ1 price stock Digi-Key Mouser
+    referencias:
+    - local_id: r7
+      url: https://www.digikey.com/en/products/detail/texas-instruments/DRV8245SQPWPRQ1/17394997
+      content_hash: 471a230d190ba958d8045003b38935863ddc307431b6d9f4c96f9b3c523f1d23
+      capture_ts: '2026-11-16T09:55:15'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: VNH7040AYTR price stock Mouser Digi-Key
+    referencias:
+    - local_id: r8
+      url: https://www.digikey.com/en/products/detail/stmicroelectronics/VNH7040AYTR/7691019
+      content_hash: ff98e6b9b991fdb803805ea9365e493cbdea0d863e46500ffbd36cab059d8633
+      capture_ts: '2026-11-16T09:55:16'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: VNH7070ASTR Digi-Key price in stock
+    referencias:
+    - local_id: r9
+      url: https://www.digikey.com/en/products/detail/stmicroelectronics/VNH7070ASTR/7313214
+      content_hash: cb3423be950bf5e6107d5ae9badd09d99a495c508a5cab5fa6f9c00a79cb235b
+      capture_ts: '2026-11-16T09:55:16'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: El VNH7040AY (ST) es un puente H completo activo, de 35 A de salida, con
+      realimentacion analogica de corriente del motor por el pin Multisense, en encapsulado
+      PowerSSO-36.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: El VNH7070AS (ST, DocID028088 Rev 5, mayo 2016) opera de 4 a 28 V con 38
+      V maximo absoluto, 15 A de salida, limitacion de corriente de 15 A minimo, PWM
+      hasta 20 kHz y encapsulado SO-16.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i1
+  - txt: El DRV8245-Q1 (TI, SLVSFJ1E, revisada junio 2026) opera de 4.5 a 35 V con
+      40 V maximo absoluto, proteccion de sobrecorriente desde 32 A, salida proporcional
+      de corriente en IPROPI, entradas logicas de 3.3 y 5 V, y lista modulos de puerta
+      entre sus aplicaciones.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r3
+    inferida_por: i1
+  - txt: 'El DRV8243-Q1 (TI) es el escalon menor de la misma familia: 12 A de salida
+      maxima, mismo rango de 4.5 a 35 V, sensado de corriente integrado y modelos
+      PSpice sin cifrar.'
+    tipo: claim
+    estatus: afirmado
+    survived_from: r4
+    inferida_por: i1
+  - txt: El BTN9970LV (Infineon) es medio puente, activo y preferido, con rango de
+      alimentacion de 8 a 18 V, 40 V maximo absoluto y deteccion de sobrecorriente
+      desde 60 A; un puente H requiere dos piezas.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r5
+    inferida_por: i1
+  - txt: El relevador EX2-2U1S (KEMET) es un doble SPDT automotriz con bobina de 12
+      VCD y contactos de 30 A; el 2026-11-15 estaba activo, a 2.79 GBP por unidad
+      y con 15,880 piezas en existencia en Digi-Key.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r6
+    inferida_por: i1
+  - txt: El 2026-11-15 el DRV8245SQPWPRQ1 costaba 7.84 USD por unidad (5.13 a 100
+      piezas) en Digi-Key, con cero existencia, 26 semanas de plazo de fabrica y reposicion
+      esperada el 2026-12-23.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r7
+    inferida_por: i1
+  - txt: El 2026-11-15 el VNH7040AYTR costaba 5.81 USD por unidad (3.73 a 100 piezas)
+      en Digi-Key, con 3,386 piezas en existencia y 99 semanas de plazo de fabrica
+      declarado.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r8
+    inferida_por: i1
+  - txt: El 2026-11-15 el VNH7070ASTR costaba 4.04 USD por unidad (2.52 a 100 piezas)
+      en Digi-Key, con 4,917 piezas en existencia y 99 semanas de plazo de fabrica
+      declarado.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r9
+    inferida_por: i1
+  - txt: 'Lectura del Estratega: con el relevador doble disponible por unidad a menor
+      precio que cualquier puente integrado, el argumento de costo en lote chico no
+      sostiene por si solo pasar el seguro a estado solido; la decision queda en uniformidad
+      de lista de materiales y vida util.'
+    tipo: claim
+    estatus: afirmado
+    survived_from: r6
+    inferida_por: i1

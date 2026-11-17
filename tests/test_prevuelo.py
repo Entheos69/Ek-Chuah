@@ -126,5 +126,55 @@ class ResilienciaPaso2(unittest.TestCase):
         self.assertFalse(fall["r3"]["load_bearing"])
 
 
+class _FakeResp:
+    """Respuesta falsa (context manager) para capturar el Request sin tocar la red."""
+    def __init__(self, body=b"ok", status=200):
+        self._b, self.status = body, status
+
+    def read(self, *a):
+        return self._b
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *a):
+        return False
+
+
+class UserAgentNavegador(unittest.TestCase):
+    """Falsador: tanto la descarga (paso 2) como el sondeo (pre-flight) se presentan como
+    NAVEGADOR. Varios hosts canonicos (digikey, st.com) devuelven 403 o cuelgan ante un UA
+    no-navegador, dejando la roca real inalcanzable. Ambos pasos DEBEN usar el MISMO UA
+    (BROWSER_UA, fuente unica en materializa_orden): si el sondeo usara uno y la descarga
+    otro, el pre-flight daria OK y el paso 2 fallaria. No toca la red: captura el Request."""
+
+    @staticmethod
+    def _capturar_request(modulo, fn):
+        real = modulo.urllib.request.urlopen
+        capturado = {}
+
+        def fake(req, *a, **k):
+            capturado["req"] = req
+            return _FakeResp()
+
+        modulo.urllib.request.urlopen = fake
+        try:
+            fn()
+        finally:
+            modulo.urllib.request.urlopen = real
+        return capturado["req"]
+
+    def test_fetch_y_probe_usan_el_mismo_ua_de_navegador(self):
+        import materializa_orden as mo
+        req_fetch = self._capturar_request(mo, lambda: mo._fetch_urllib("https://x.example/a"))
+        req_probe = self._capturar_request(prevuelo, lambda: prevuelo._probe_urllib("https://x.example/a"))
+        ua_fetch = req_fetch.get_header("User-agent")
+        ua_probe = req_probe.get_header("User-agent")
+        self.assertEqual(ua_fetch, mo.BROWSER_UA)
+        self.assertEqual(ua_probe, mo.BROWSER_UA)        # misma fuente de verdad -> sin drift
+        self.assertIn("Mozilla", ua_fetch)
+        self.assertNotIn("ek-chuah", ua_fetch.lower())   # ya no el UA que digikey/st rechazan
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
