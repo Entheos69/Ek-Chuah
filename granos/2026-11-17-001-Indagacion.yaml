@@ -2,7 +2,7 @@ ek_chuah_aec:
   meta:
     schema_version: aec-1
     session_id: 2026-11-17-001-Indagacion
-    consolidado_por: PENDIENTE
+    consolidado_por: Guardian
     project: ek-chuah
   inscripciones:
   - local_id: i1
@@ -89,49 +89,32 @@ ek_chuah_aec:
     referencias:
     - local_id: r1
       url: https://www.renesas.com/en/document/dst/rl78f13-f14-datasheet
-      content_hash: MATERIALIZAR
-      capture_ts: MATERIALIZAR
+      content_hash: a13e7969b20d08def929531cb2ae0de086a6332b73fc8b463c56e114ebdc7c83
+      capture_ts: '2026-11-18T12:46:09'
       fecha_fuente: capture
       estatus: viva
   - formulacion: R5F10BGCLFB RL78/F13 48-LQFP Digi-Key price stock
     referencias:
     - local_id: r2
       url: https://www.digikey.es/en/products/detail/renesas-electronics-corporation/R5F10BGECLFB-15/19235760
-      content_hash: MATERIALIZAR
-      capture_ts: MATERIALIZAR
-      fecha_fuente: capture
-      estatus: viva
-  - formulacion: STM8AF6266 STM8AF6223 automotive 8-bit MCU 5V AEC-Q100 status active
-      longevity
-    referencias:
-    - local_id: r3
-      url: https://www.st.com/en/microcontrollers-microprocessors/stm8af6266.html
-      content_hash: MATERIALIZAR
-      capture_ts: MATERIALIZAR
+      content_hash: 15657c01415c8ec2b421e1c3cd8d3784965eecd750a6c5f159a8ca4a57575ba2
+      capture_ts: '2026-11-18T12:46:11'
       fecha_fuente: capture
       estatus: viva
   - formulacion: STM8AF6266TCY Digi-Key price stock
     referencias:
     - local_id: r4
       url: https://www.digikey.com/en/products/detail/stmicroelectronics/STM8AF6266TCY/2683035
-      content_hash: MATERIALIZAR
-      capture_ts: MATERIALIZAR
-      fecha_fuente: capture
-      estatus: viva
-  - formulacion: NXP S32K116 automotive MCU 5V 32-pin 48-pin AEC-Q100 price
-    referencias:
-    - local_id: r5
-      url: https://ie.farnell.com/nxp/fs32k116lat0mfmt/mcu-aec-q100-32bit-48mhz-qfn/dp/2985265
-      content_hash: MATERIALIZAR
-      capture_ts: MATERIALIZAR
+      content_hash: 0cf3868a93fd8fccef38c7df4a98a5c73a0be8a3def898b9bd1027fd624a0eff
+      capture_ts: '2026-11-18T12:46:12'
       fecha_fuente: capture
       estatus: viva
   - formulacion: AVR64DD32 automotive VAO AEC-Q100 Digi-Key AVR64DD32T-E/PT price
     referencias:
     - local_id: r6
       url: https://www.digikey.com/en/products/detail/microchip-technology/AVR64DD32-E-RXBVAO/26728457
-      content_hash: MATERIALIZAR
-      capture_ts: MATERIALIZAR
+      content_hash: c14d6556cafc322df69b97f33acf010e1f1425118e62756f6dc9e2c6fcea470a
+      capture_ts: '2026-11-18T12:46:13'
       fecha_fuente: capture
       estatus: viva
   - formulacion: TI MSPM0L1306-Q1 MSPM0G3507-Q1 automotive microcontroller AEC-Q100
@@ -139,8 +122,8 @@ ek_chuah_aec:
     referencias:
     - local_id: r7
       url: https://www.ti.com/product/MSPM0G3507-Q1
-      content_hash: MATERIALIZAR
-      capture_ts: MATERIALIZAR
+      content_hash: 8a79a6d95d85b6bb4eedf58fb6e6a68d3c4ab0930108c43915e8865bd5e53e74
+      capture_ts: '2026-11-18T12:46:13'
       fecha_fuente: capture
       estatus: viva
   - formulacion: automotive LDO 40V low quiescent current 5V TPS7B81-Q1 TLS810B1 MCP1799
@@ -148,16 +131,16 @@ ek_chuah_aec:
     referencias:
     - local_id: r8
       url: https://ti.com/product/TPS7B81-Q1
-      content_hash: MATERIALIZAR
-      capture_ts: MATERIALIZAR
+      content_hash: 6ba39dbd034300a107aa900c05cb529b13f00c5b864ceef053dfae93290f184c
+      capture_ts: '2026-11-18T12:46:14'
       fecha_fuente: capture
       estatus: viva
   - formulacion: TPS7B8150QDGNRQ1 Digi-Key price stock
     referencias:
     - local_id: r9
       url: https://www.digikey.com.mx/en/products/detail/texas-instruments/TPS7B8150QDGNRQ1/10445090
-      content_hash: MATERIALIZAR
-      capture_ts: MATERIALIZAR
+      content_hash: e4e28b864716f78a70a0a13082d4432fdc51764ee483ee493713b738d600ccc1
+      capture_ts: '2026-11-18T12:46:15'
       fecha_fuente: capture
       estatus: viva
   - formulacion: Infineon TLS810B1 LDO 5V 45V 5 µA quiescent current automotive datasheet
@@ -165,8 +148,8 @@ ek_chuah_aec:
     referencias:
     - local_id: r10
       url: https://www.digikey.co.uk/en/products/detail/infineon-technologies/TLS810B1LDV50XUMA1/5845310
-      content_hash: MATERIALIZAR
-      capture_ts: MATERIALIZAR
+      content_hash: 5a8ec6426197b81a565a2c6f3cfd3b42bc360f3852cde74e1de55b2addcc81d3
+      capture_ts: '2026-11-18T12:46:15'
       fecha_fuente: capture
       estatus: viva
   - formulacion: Microchip MCP1799 automotive LDO 45V 80 mA AEC-Q100 5V price Digi-Key
@@ -174,8 +157,8 @@ ek_chuah_aec:
     referencias:
     - local_id: r11
       url: https://www.digikey.co.uk/en/products/detail/microchip-technology/MCP1799T-5002H-TTVAO/18896524
-      content_hash: MATERIALIZAR
-      capture_ts: MATERIALIZAR
+      content_hash: dee5252bfb0b042edb69147ee466a2a887f4ad09de6606e38cb8f9d4526680c5
+      capture_ts: '2026-11-18T12:46:36'
       fecha_fuente: capture
       estatus: viva
   afirmaciones:
@@ -194,27 +177,12 @@ ek_chuah_aec:
     estatus: afirmado
     survived_from: r2
     inferida_por: i1
-  - txt: El STM8AF6266 (ST) esta en produccion, se alimenta de 3.3 a 5 V, es de 32
-      pines con flash de 16 a 32 KB y ADC de 10 bits, calificado AEC-Q100 rev G, con
-      disponibilidad comprometida hasta enero de 2036.
-    tipo: claim
-    estatus: afirmado
-    survived_from: r3
-    inferida_por: i1
   - txt: El 2026-11-17 el STM8AF6266TCY (32-LQFP, 25 E/S) costaba 4.53 USD por unidad
       (2.83 a 100 piezas) en Digi-Key, con 8,732 piezas en existencia y 16 semanas
       de plazo de fabrica.
     tipo: claim
     estatus: afirmado
     survived_from: r4
-    inferida_por: i1
-  - txt: El 2026-11-17 el FS32K116LAT0MFMT (NXP S32K116, QFN de 32 pines, 2.7 a 5.5
-      V, 128 KB, ADC de 12 bits con 13 canales, AEC-Q100) costaba 4.88 EUR por unidad
-      (3.45 a 100 piezas) en Farnell, con 1,271 piezas en existencia y 39 semanas
-      de plazo de fabrica.
-    tipo: claim
-    estatus: afirmado
-    survived_from: r5
     inferida_por: i1
   - txt: El 2026-11-17 el AVR64DD32-E/RXBVAO (Microchip, VQFN de 32 pines, 1.8 a 5.5
       V, 26 E/S, AEC-Q100) costaba 1.53 USD por unidad (1.27 a 100 piezas) en Digi-Key,
@@ -269,36 +237,3 @@ ek_chuah_aec:
     estatus: afirmado
     survived_from: r4
     inferida_por: i1
-reevaluacion:
-  generado: '2026-11-18T12:01:08'
-  bloqueantes: 2
-  avisos: 0
-  sospecha_fabricacion: false
-  instruccion: 'Re-evalua el camino epistemico SIN re-investigar de cero: el contexto
-    esta en este grano. Para cada ref abajo: si sospecha=fabricacion, la cita probablemente
-    no existe -> retira la afirmacion que sostiene o sustituyela con una fuente viva
-    equivalente y verificada; si sospecha=degradacion, sustituye la URL por una roca
-    viva equivalente. Luego re-emite el grano (pon content_hash/capture_ts = MATERIALIZAR
-    en las refs sustituidas).'
-  refs:
-  - local_id: r3
-    url: https://www.st.com/en/microcontrollers-microprocessors/stm8af6266.html
-    estado: TIMEOUT
-    detalle: read/connect timeout
-    severidad: BLOQUEANTE
-    sospecha: degradacion
-    sostiene:
-    - El STM8AF6266 (ST) esta en produccion, se alimenta de 3.3 a 5 V, es de 32 pines
-      con flash de 16 a 32 KB y ADC de 10 bits, calificado AEC-Q100 rev G, con disponibilidad
-      comprometida hasta enero de 2036.
-  - local_id: r5
-    url: https://ie.farnell.com/nxp/fs32k116lat0mfmt/mcu-aec-q100-32bit-48mhz-qfn/dp/2985265
-    estado: HTTP
-    detalle: '403'
-    severidad: BLOQUEANTE
-    sospecha: degradacion
-    sostiene:
-    - El 2026-11-17 el FS32K116LAT0MFMT (NXP S32K116, QFN de 32 pines, 2.7 a 5.5 V,
-      128 KB, ADC de 12 bits con 13 canales, AEC-Q100) costaba 4.88 EUR por unidad
-      (3.45 a 100 piezas) en Farnell, con 1,271 piezas en existencia y 39 semanas
-      de plazo de fabrica.
