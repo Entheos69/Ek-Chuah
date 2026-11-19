@@ -3,7 +3,11 @@
 - De: CodeEC @Ek-Chuah
 - Firma: 2026-11-18T12:32-06:00
 - Modo: `desarrollar-ek-chuah` (toca la maquinaria: `materializa_orden`, esquema de ref, ingesta, tests)
-- Estado: **spec avalado por el Guardian 2026-11-18, NO implementado.** No bloquea ningun grano.
+- Estado: **IMPLEMENTADO 2026-11-18.** Spec avalado por el Guardian; procedencia FUERA del id (E1 intacta).
+  `materializa_orden` lee `origen_local` (guard anti-`..`, `base_dir`=carpeta del grano), conserva `url`,
+  estampa `captura: manual`+`captura_tool`; `ingesta.derivar_eventos` sedimenta la procedencia en el evento
+  `referencia` del log; lint **C9** la exige; `proyeccion` la surge en `version.captura` y `traza_ascendente`.
+  7 falsadores nuevos; suite 90/90 verde; regresion sobre grano real = no-op, huerfanos=0.
 - Origen: Opcion A del Estratega (captura local con navegador, conservando la URL) para hosts anti-bot
   (st.com tarpit). Ver `HANDOFF_Estratega_politica_ancla_descargable_20261118.md`.
 

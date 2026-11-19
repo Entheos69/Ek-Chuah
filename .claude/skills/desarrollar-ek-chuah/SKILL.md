@@ -78,15 +78,20 @@ Caracterizacion de cada modulo para NO re-investigar. Formato: **rol** | API cla
 ### Pipeline de granos (paso 0 nube + pasos 1-4 locales; detalle en la seccion Pipeline arriba)
 - **`prevuelo.py`** | `prevuelo(doc, probe=_probe_urllib)`, severidades BLOQUEANTE/AVISO/OK; `probe` inyectable.
   Baja el cuerpo COMPLETO al sondear (para cazar el host que sirve 200 y se cuelga). Read-only.
-- **`materializa_orden.py`** | `materializar_orden(doc,store,fetch=...)`, muta el doc in-place, resiliente
-  por-ref (una URL muerta no tumba el grano; queda en `MATERIALIZAR`), `fetch` inyectable. Escribe snapshots.
-- **`ingesta.py`** | `derivar_eventos(doc)` (PURA, fuente unica de ids) -> `ingest_doc` (lint C0-C8 + gate C3 +
+- **`materializa_orden.py`** | `materializar_orden(doc,store,fetch=...,base_dir=None)`, muta el doc in-place,
+  resiliente por-ref (una fuente caida no tumba el grano; queda en `MATERIALIZAR`), `fetch` inyectable. Escribe
+  snapshots. **Via de captura local:** si una ref trae `origen_local` (archivo), lee el byte de ahi (no de la
+  red) via `_leer_archivo_local` (guard anti-`..` relativo a `base_dir`), conserva `url` como localizador y
+  estampa `captura: manual` + `captura_tool`. Para hosts anti-bot (st.com) que urllib no cruza.
+- **`ingesta.py`** | `derivar_eventos(doc)` (PURA, fuente unica de ids) -> `ingest_doc` (lint C0-C9 + gate C3 +
   append). `lint(doc,store)` devuelve errores bloqueantes (fase por `store`: None=emision, dado=ingesta);
   `basename_ok(stem,doc)` = C0 identidad-doble (vive fuera de `lint` porque este no conoce el archivo);
-  `session_id_de`. En emision, C3/C5 exigen el placeholder `MATERIALIZAR` (membrana D2); C2 exige inferidor.
+  `session_id_de`. En emision, C3/C5 exigen el placeholder `MATERIALIZAR` (membrana D2); C2 exige inferidor;
+  **C9** (estructural, ambas fases) exige que una captura manual (`origen_local`/`captura: manual`) se declare
+  con su herramienta -> la procedencia va al EVENTO (sedimenta en el log), NUNCA al id (E1 intacta).
   CERO red. Idempotente (E1).
 - **`aec_verify.py`** | Gate PRE-emision del Estratega (lado nube+navegador). NO reimplementa el lint:
-  DELEGA C0-C8 a `ingesta.lint`/`basename_ok` (importa el repo; degrada a solo-V* si no es importable).
+  DELEGA C0-C9 a `ingesta.lint`/`basename_ok` (importa el repo; degrada a solo-V* si no es importable).
   Aporta lo unico imposible sin la fuente enfrente: **V1** verbatim (texto == substring literal de la captura
   del DOM -> caza el anti-patron #1 "sintetizar en vez de citar"), **V2** extracto <15 palabras, **V3** captura
   asociada. Avisos (no bloquean): coherencia consulta<->busqueda, reloj session_id vs inferidor.ts, derivados

@@ -87,7 +87,7 @@ Clasifica cada ref load-bearing inalcanzable y anota el grano in-place con un bl
 **Experiencia acumulada -- hosts anti-bot medidos** (ver memoria `fetch-antibot-hosts.md`):
 - **st.com** = tarpit Akamai; NO cruza `urllib` en ningun formato (HTML ni el PDF `/resource/...`),
   ni con UA de navegador a 40 s. Dato que solo vive ahi (p. ej. compromiso de longevidad): sacar
-  del AEC, o via de captura local (pendiente, ver `NOTA_DEV_origen_local_captura`).
+  del AEC, o **via de captura local** (ver abajo).
 - **Farnell** = HTTP 403 determinista. Re-anclar a Digi-Key/Mouser del mismo MPN.
 - **Mouser** = a veces HTML "Access denied" (PerimeterX) con HTTP 200 en vez del PDF (`%PDF-`).
 - **Digi-Key** = baja con UA de navegador (403 ocasional = rate-limit; el resiliente reintenta).
@@ -109,6 +109,29 @@ sustituir con una URL que no fue la evidencia). Luego vuelve a Etapa 1 y confirm
 Regla de decision: **DNS muerto load-bearing -> devolver (sospecha fabricacion); anti-bot/degradada
 load-bearing -> devolver o re-anclar a roca descargable; no load-bearing -> quitar. Nunca inventes
 la roca ni fabriques procedencia para pasar el gate.**
+
+## Via de captura local (roca canonica tras un muro anti-bot)
+
+Cuando un dato canonico SOLO vive en un host que `urllib` no cruza (st.com) y no quieres sacarlo
+del AEC, el actor LOCAL (CodeEC via Claude-in-Chrome, o el Guardian a mano) guarda la pagina/PDF
+como archivo y materializa DESDE el archivo, conservando la URL original como localizador:
+
+1. Guarda el byte canonico en una carpeta que lea el grano (p. ej. `granos/capturas/<ref>.pdf`).
+   Prefiere un documento canonico y byte-estable (datasheet PDF), no HTML de precio volatil.
+2. En la ref del grano, ademas de `url` (se conserva como localizador), agrega:
+
+       origen_local: "capturas/<ref>.pdf"   # ruta relativa a la carpeta del grano (no puede escapar)
+       captura: "manual"
+       captura_tool: "claude-in-chrome"       # o "guardian-manual"
+
+3. Materializa normal: lee el byte del archivo (no de la red), calcula el hash y sella el
+   `capture_ts` en la puerta (reloj sancionado, NUNCA el mtime). La URL queda intacta.
+4. Ingiere normal: la procedencia (`captura: manual` + herramienta) **sedimenta en el log**
+   (gate C9), para que WORM nunca presente una captura a mano como descarga `urllib`.
+
+Membrana: el default sigue siendo `urllib`; la captura es la **excepcion marcada**. La conduce el
+actor local (del mismo lado que el WORM), NO el Estratega (nube). La procedencia va al evento, nunca
+al id determinista -> no mueve identidades (E1 intacta). Detalle de diseno: `NOTA_DEV_origen_local_captura`.
 
 ## Verificar el consumo (¿ya fue ingerido?)
 

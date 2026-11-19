@@ -31,7 +31,8 @@ CREATE TABLE necesidad(id TEXT PRIMARY KEY, pregunta TEXT, gatillo TEXT,
 CREATE TABLE consulta(id TEXT PRIMARY KEY, nec_id TEXT, formulacion TEXT, ts TEXT);
 CREATE TABLE referente(referente_id TEXT PRIMARY KEY, primera_captura TEXT);
 CREATE TABLE version(id TEXT PRIMARY KEY, referente_id TEXT, content_hash TEXT,
-    url_cruda TEXT, capture_ts TEXT, fecha_fuente TEXT, q_id TEXT, estatus TEXT, ts TEXT);
+    url_cruda TEXT, capture_ts TEXT, fecha_fuente TEXT, q_id TEXT, estatus TEXT,
+    captura TEXT, captura_tool TEXT, ts TEXT);
 CREATE TABLE afirmacion(id TEXT PRIMARY KEY, txt TEXT, insc_id TEXT, ref_id TEXT,
     tipo TEXT, estatus TEXT, ts TEXT);
 CREATE TABLE referente_assert(id TEXT, referente_a TEXT, referente_b TEXT,
@@ -72,10 +73,11 @@ def reconstruir(store, db_path: str) -> sqlite3.Connection:
             cx.execute("UPDATE referente SET primera_captura=? "
                        "WHERE referente_id=? AND primera_captura>?",
                        (ev["capture_ts"], ref, ev["capture_ts"]))
-            cx.execute("INSERT OR IGNORE INTO version VALUES(?,?,?,?,?,?,?,?,?)",
+            cx.execute("INSERT OR IGNORE INTO version VALUES(?,?,?,?,?,?,?,?,?,?,?)",
                        (ev["id"], ref, ev["content_hash"], ev["url_cruda"],
                         ev["capture_ts"], ev["fecha_fuente"], ev["q_id"],
-                        ev.get("estatus", "viva"), ts))
+                        ev.get("estatus", "viva"),
+                        ev.get("captura", "automatica"), ev.get("captura_tool", ""), ts))
         elif kind == "afirmacion":
             cx.execute("INSERT OR IGNORE INTO afirmacion VALUES(?,?,?,?,?,?,?)",
                        (ev["id"], ev["txt"], ev["insc_id"], ev.get("ref_id"),
@@ -150,7 +152,8 @@ def traza_ascendente(cx, af_id: str) -> dict:
         v = cx.execute("SELECT * FROM version WHERE id=?", (a["ref_id"],)).fetchone()
         if v:
             out["version"] = {"referente_id": v["referente_id"], "content_hash": v["content_hash"],
-                              "url_cruda": v["url_cruda"], "capture_ts": v["capture_ts"]}
+                              "url_cruda": v["url_cruda"], "capture_ts": v["capture_ts"],
+                              "captura": v["captura"]}
             q = cx.execute("SELECT * FROM consulta WHERE id=?", (v["q_id"],)).fetchone()
             if q:
                 out["consulta"] = q["formulacion"]
