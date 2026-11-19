@@ -19,6 +19,7 @@ ni re-sella capture_ts). Materializa la orden UNA vez; el archivo resultante es 
 fetch inyectable (default urllib, stdlib) -> los tests no tocan la red. Sin emojis (Windows).
 """
 from __future__ import annotations
+import os
 import datetime
 import urllib.request
 import yaml
@@ -45,11 +46,32 @@ def _fetch_urllib(url: str, timeout: int = 45) -> bytes:
         return r.read()
 
 
+def _leer_archivo_local(origen: str, base_dir: str = None) -> bytes:
+    """Via de captura local: lee los BYTES de una captura hecha a mano (navegador), para
+    anclar una roca que vive tras un muro anti-bot que urllib no cruza (ver NOTA_DEV
+    origen_local). Resuelve `origen` relativo a base_dir (la carpeta del grano); una ruta
+    absoluta se usa tal cual (eleccion explicita del actor local). Una ruta RELATIVA no
+    puede escapar de base_dir (guard anti-`..`). NO sanciona el reloj ni calcula el hash:
+    eso lo hace materializar_orden en la puerta, igual que con una descarga."""
+    if os.path.isabs(origen):
+        ruta = os.path.abspath(origen)
+    else:
+        base = os.path.abspath(base_dir or ".")
+        ruta = os.path.abspath(os.path.join(base, origen))
+        if os.path.commonpath([base, ruta]) != base:
+            raise ValueError(f"origen_local '{origen}' escapa de la carpeta del grano (base_dir)")
+    if not os.path.isfile(ruta):
+        raise FileNotFoundError(f"origen_local no existe o no es un archivo: {ruta}")
+    with open(ruta, "rb") as f:
+        return f.read()
+
+
 def _pendiente(r) -> bool:
     return r.get("content_hash") in (None, PLACEHOLDER, "")
 
 
-def materializar_orden(doc, store, fetch=_fetch_urllib, consolidado_por=None, clock=None) -> dict:
+def materializar_orden(doc, store, fetch=_fetch_urllib, consolidado_por=None, clock=None,
+                       base_dir=None) -> dict:
     """Baja la roca de cada referencia pendiente a WORM y rellena content_hash + capture_ts.
     Muta doc in-place. Devuelve resumen. NO toca graph_aec.
 
@@ -72,18 +94,23 @@ def materializar_orden(doc, store, fetch=_fetch_urllib, consolidado_por=None, cl
             if not _pendiente(r):
                 ya.append(lid)
                 continue
+            origen = r.get("origen_local")         # via de captura local (host anti-bot)
             try:
-                data = fetch(r["url"])             # descarga (red)
-            except Exception as e:                 # una URL muerta no tumba el grano entero
+                data = (_leer_archivo_local(origen, base_dir) if origen
+                        else fetch(r["url"]))      # archivo local, o descarga (red)
+            except Exception as e:                 # una fuente caida no tumba el grano entero
                 fallidas.append({"local_id": lid, "url": r.get("url"),
                                  "error": f"{type(e).__name__}: {e}",
                                  "load_bearing": lid in lb})
                 continue                           # la ref queda en MATERIALIZAR (pendiente)
             h = store.put_snapshot(data)           # WORM idempotente (mismo hash = no-op)
             r["content_hash"] = h
-            r["capture_ts"] = clock()              # reloj sancionado en la puerta
-            bajadas.append({"local_id": lid, "url": r["url"],
-                            "content_hash": h, "bytes": len(data)})
+            r["capture_ts"] = clock()              # reloj sancionado en la puerta (NUNCA mtime)
+            if origen:                             # procedencia: el actor local capturo a mano;
+                r["captura"] = "manual"            # conserva r["url"] como localizador canonico
+                r.setdefault("captura_tool", "desconocido")
+            bajadas.append({"local_id": lid, "url": r["url"], "content_hash": h,
+                            "bytes": len(data), "captura": r.get("captura", "automatica")})
     return {"materializadas": bajadas, "ya_materializadas": ya, "fallidas": fallidas,
             "consolidado_por": (aec.get("meta") or {}).get("consolidado_por")}
 
@@ -95,7 +122,9 @@ def materializar_archivo(in_path, store, out_path=None, fetch=_fetch_urllib,
     Usa --out solo si quieres escribir a otra ruta."""
     with open(in_path, "r", encoding="utf-8") as f:
         doc = yaml.safe_load(f)
-    res = materializar_orden(doc, store, fetch=fetch, consolidado_por=consolidado_por)
+    # base_dir = la carpeta del grano: ancla las rutas RELATIVAS de origen_local (captura local).
+    res = materializar_orden(doc, store, fetch=fetch, consolidado_por=consolidado_por,
+                             base_dir=os.path.dirname(os.path.abspath(in_path)))
     out_path = out_path or in_path
     with open(out_path, "w", encoding="utf-8") as f:
         yaml.safe_dump(doc, f, allow_unicode=True, sort_keys=False)

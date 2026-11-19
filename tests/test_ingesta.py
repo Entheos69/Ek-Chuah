@@ -257,6 +257,62 @@ class Ingesta(unittest.TestCase):
         AecStore(faltante, create=True)               # bootstrap explicito -> ok
         self.assertTrue(os.path.isdir(os.path.join(faltante, "log")))
 
+    # ---- via de captura local: la procedencia manual SEDIMENTA en el log y la proyeccion ----
+    def test_captura_manual_sedimenta_en_log_y_proyeccion(self):
+        h = self._materializar()
+        doc = _doc(h)
+        r = doc["ek_chuah_aec"]["consultas"][0]["referencias"][0]
+        r["captura"] = "manual"
+        r["captura_tool"] = "claude-in-chrome"
+        res = ingest_doc(doc, self.store)
+        refs = [ev for ev in self.store.iter_events() if ev.get("ev") == "referencia"]
+        self.assertEqual(len(refs), 1)
+        self.assertEqual(refs[0]["captura"], "manual", "la procedencia no sedimento en el log")
+        self.assertEqual(refs[0]["captura_tool"], "claude-in-chrome")
+        cx = proyeccion.reconstruir(self.store, self.db)
+        row = cx.execute("SELECT captura, captura_tool FROM version").fetchone()
+        self.assertEqual(row["captura"], "manual")
+        self.assertEqual(row["captura_tool"], "claude-in-chrome")
+        asc = proyeccion.traza_ascendente(cx, res["afirmaciones"][0])
+        self.assertEqual(asc["version"]["captura"], "manual", "el lector no ve la procedencia")
+        cx.close()
+
+    # ---- una ref normal (sin campo) sedimenta captura=automatica: el log no queda ambiguo ----
+    def test_captura_default_automatica(self):
+        h = self._materializar()
+        ingest_doc(_doc(h), self.store)
+        refs = [ev for ev in self.store.iter_events() if ev.get("ev") == "referencia"]
+        self.assertEqual(refs[0]["captura"], "automatica")
+
+    # ---- C9: una roca con origen_local DEBE declararse manual (no colar captura a mano como descarga) ----
+    def test_C9_origen_local_exige_captura_manual(self):
+        h = self._materializar()
+        doc = _doc(h)
+        doc["ek_chuah_aec"]["consultas"][0]["referencias"][0]["origen_local"] = "capturas/x.html"
+        self.assertTrue(any(e.startswith("C9") for e in lint(doc, self.store)))
+        with self.assertRaises(IngestaError):
+            ingest_doc(doc, self.store)
+
+    # ---- C9: una captura manual DEBE decir con que herramienta se hizo ----
+    def test_C9_manual_exige_tool(self):
+        h = self._materializar()
+        doc = _doc(h)
+        doc["ek_chuah_aec"]["consultas"][0]["referencias"][0]["captura"] = "manual"
+        self.assertTrue(any(e.startswith("C9") for e in lint(doc, self.store)),
+                        "captura manual sin captura_tool debe fallar C9")
+
+    # ---- E1: la procedencia NO entra en el id determinista -> no mueve ningun id (idempotencia) ----
+    def test_captura_fuera_del_id(self):
+        h = self._materializar()
+        ids_normal = [eid for eid, _ in ingesta.derivar_eventos(_doc(h))]
+        doc = _doc(h)
+        r = doc["ek_chuah_aec"]["consultas"][0]["referencias"][0]
+        r["captura"] = "manual"
+        r["captura_tool"] = "claude-in-chrome"
+        ids_manual = [eid for eid, _ in ingesta.derivar_eventos(doc)]
+        self.assertEqual(ids_normal, ids_manual,
+                         "la procedencia movio un id determinista: rompe E1 (re-mapea identidades)")
+
     # ---- ingesta desde archivo (camino yaml.safe_load + CLI) ----
     def test_ingest_desde_archivo(self):
         import yaml

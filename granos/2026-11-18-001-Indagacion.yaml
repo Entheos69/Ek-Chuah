@@ -1,0 +1,82 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-11-18-001-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'Complemento del grano 2026-11-17-001-Indagacion tras la devolucion de
+      CodeEC del 2026-11-18: dos de sus referencias (la pagina de ST del STM8AF6266
+      y la ficha de Farnell del S32K116) no bajan por el descargador local. Las dos
+      afirmaciones afectadas se retiraron de aquel grano y se re-leen aqui contra
+      fichas de Digi-Key, que si bajan; cada afirmacion se reduce a lo que su nueva
+      fuente sostiene.
+
+      '
+    busqueda:
+    - STM8AF6266TCY Digi-Key price stock
+    - FS32K116LAT0MFMT Digi-Key
+    resultados_crudos:
+    - fuente: digikey.com (STM8AF6266TCY, tabla de atributos)
+      texto: A/D 7x10b
+    - fuente: digikey.co.uk (FS32K116LAT0MFMT, tabla de atributos)
+      texto: A/D 13x12b SAR; D/A 1x8b
+    conclusion: 'Lectura del 2026-11-18, no hecho. La ficha de Digi-Key del STM8AF6266TCY
+      sostiene los datos tecnicos y la calificacion AEC-Q100, pero no la revision
+      de la norma ni el compromiso de disponibilidad hasta 2036, que solo se leyeron
+      en st.com el dia 17: ambos quedan fuera del AEC. La ficha de Digi-Key del FS32K116LAT0MFMT
+      da precio, existencia y plazo de hoy, distintos de los de Farnell del dia 17
+      (4.88 EUR, 1,271 piezas), y no lista calificacion: la mencion AEC-Q100 del S32K116
+      queda fuera tambien. Una ficha de distribuidor es una lectura fechada y volatil,
+      no una especificacion; se acepta como ancla porque baja de forma reproducible.
+      Re-verificar pasados 45 dias.
+
+      '
+    inferidor:
+      model: estratega/claude-fable-5-2
+      ts: '2026-11-18T12:31:17'
+  necesidad:
+    pregunta: 'Que sostienen, en fuentes que el descargador local si puede bajar,
+      las dos afirmaciones sobre el STM8AF6266 y el S32K116 retiradas del grano 2026-11-17-001-Indagacion
+      (terna de microcontrolador automotriz de 5 V para el modulo de puerta).
+
+      '
+    gatillo: 'explicito:''procede'' (Guardian, 2026-11-18, sobre la devolucion de
+      CodeEC del grano 2026-11-17-001-Indagacion y el plan acordado: r5 a Digi-Key,
+      lo tecnico de r3 a la ficha de Digi-Key, el compromiso de 2036 fuera del AEC)'
+    origen_nodo: null
+  consultas:
+  - formulacion: STM8AF6266TCY Digi-Key price stock
+    referencias:
+    - local_id: r1
+      url: https://www.digikey.com/en/products/detail/stmicroelectronics/STM8AF6266TCY/2683035
+      content_hash: a255bd5b80d4411ef983fe44184744ddc270144bc66ab08a5aa02c8bb8aabce5
+      capture_ts: '2026-11-18T12:46:16'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: FS32K116LAT0MFMT Digi-Key
+    referencias:
+    - local_id: r2
+      url: https://www.digikey.co.uk/en/products/detail/nxp-usa-inc/FS32K116LAT0MFMT/9739800
+      content_hash: 1d9658a0c04feef995f59ef1113165398686ac35384980437afe89cb858fb52d
+      capture_ts: '2026-11-18T12:46:18'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: 'El STM8AF6266TCY (ST) figura activo en Digi-Key el 2026-11-18: nucleo STM8A
+      de 8 bits a 16 MHz, 32 KB de flash, alimentacion de 3 a 5.5 V, ADC de 10 bits
+      con 7 canales, 25 E/S, 32-LQFP, de -40 a 125 C, grado automotriz con calificacion
+      AEC-Q100.'
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: El 2026-11-18 el FS32K116LAT0MFMT (NXP S32K116, Cortex-M0+, HVQFN de 32 pines,
+      2.7 a 5.5 V, 128 KB, ADC de 12 bits con 13 canales, 28 E/S, de -40 a 125 C)
+      costaba 4.43 GBP por unidad (2.85 a 100 piezas) en Digi-Key, con 306 piezas
+      en existencia y 39 semanas de plazo de fabrica.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i1

@@ -63,21 +63,75 @@ Exit 0 = sin bloqueantes. Exit 1 = hay bloqueantes; no avances hasta resolver.
 - Para validar sin escribir: `python ingesta.py granos/<grano>.yaml --aec ../AEC --lint-only`.
 - **Exito** = `INGESTA OK: ... huerfanos=0`. Idempotente (E1): re-ingerir = no-op.
 
-## Playbook: resolver una fuente muerta
+## Playbook: resolver un BLOQUEANTE (fuente muerta vs host vivo anti-bot)
 
-1. **Confirma el modo de fallo** con un sondeo directo (DNS vs timeout vs HTTP):
-   `python -c "import socket; socket.getaddrinfo('<host>',443)"` (DNS), o un `urlopen` con timeout.
-2. **Es load-bearing** (sostiene una afirmacion): **reemplaza la fuente** por una **roca viva
-   equivalente** que diga lo mismo que la `conclusion`/`txt` ya registrada. Busca en la web una
-   fuente durable y canonica (evita DDNS gratuitos / hosts efimeros). Edita solo `<ref>.url` y
-   re-materializa. Justificacion: el claim es real; re-anclas la MISMA afirmacion a una roca
-   verdadera.
-3. **NO es load-bearing** (ninguna afirmacion tiene `survived_from: <ese ref>`): **quita la
-   referencia** del grano. Quitar es mas honesto que sustituir con una URL que no fue la evidencia.
-4. Vuelve a la Etapa 1 y confirma OK antes de materializar/ingerir.
+**Primero clasifica el modo de fallo** -- no toda ref inalcanzable es una fuente muerta. Sondeo
+directo: `python -c "import socket; socket.getaddrinfo('<host>',443)"` (DNS) y un `urlopen` con
+timeout. `devolucion.py` ya hace esta clasificacion por ti (reusa el sondeo de prevuelo):
 
-Regla de decision: **load-bearing muerta -> reemplaza; no load-bearing muerta -> quita.**
-Nunca inventes la roca.
+    python -c "import truststore; truststore.inject_into_ssl(); import devolucion, sys; sys.exit(devolucion._main(['granos/<grano>.yaml']))"
+
+Clasifica cada ref load-bearing inalcanzable y anota el grano in-place con un bloque out-of-band
+`reevaluacion:` (read-only vs WORM; materializa/ingesta lo ignoran):
+
+- **`fabricacion`** (load-bearing + **DNS muerto**: el host no resuelve) -> la URL probablemente
+  **nunca existio**. Señal de alucinacion del Estratega. NO la reemplaces tu: **devuelve el grano**
+  al Estratega (ya trae el bloque `reevaluacion:`) para que retire o sustituya la afirmacion.
+- **`degradacion`** (load-bearing + **TIMEOUT / HTTP 403 / ERROR**: el DNS SI resuelve) -> la fuente
+  **existe y esta viva**, solo esta inalcanzable para el substrato. Dos sub-casos:
+  - **Fuente realmente muerta/movida** (404, dominio caducado): re-anclar o quitar (ver abajo).
+  - **Host vivo que rechaza al fetcher (anti-bot)**: NO esta muerta; tu lector/navegador la cruza
+    pero `urllib` no. **No la reemplaces unilateralmente**: es el trazo epistemico del Estratega.
+    **Devuelve el grano** (flujo B realineado: bloqueante -> `devolucion.py`, no parchear la roca).
+
+**Experiencia acumulada -- hosts anti-bot medidos** (ver memoria `fetch-antibot-hosts.md`):
+- **st.com** = tarpit Akamai; NO cruza `urllib` en ningun formato (HTML ni el PDF `/resource/...`),
+  ni con UA de navegador a 40 s. Dato que solo vive ahi (p. ej. compromiso de longevidad): sacar
+  del AEC, o **via de captura local** (ver abajo).
+- **Farnell** = HTTP 403 determinista. Re-anclar a Digi-Key/Mouser del mismo MPN.
+- **Mouser** = a veces HTML "Access denied" (PerimeterX) con HTTP 200 en vez del PDF (`%PDF-`).
+- **Digi-Key** = baja con UA de navegador (403 ocasional = rate-limit; el resiliente reintenta).
+- El rechazo es **host-especifico, no una ley general**: Renesas/TI publican datasheet PDF que baja;
+  Digi-Key es distribuidor-ancla fiable. Anclar bien evita el bloqueante de raiz.
+
+**Politica de ancla** (avalada Guardian 2026-11-18, `HANDOFF_Estratega_politica_ancla_descargable`):
+el `survived_from` debe apuntar a una **roca que el substrato baje** (datasheet PDF del fabricante
+que baje, o ficha de distribuidor que baje). El HTML de un fabricante anti-bot es **lectura, no
+ancla**. Un precio es una lectura fechada -> anclar a distribuidor que baje, nunca consagrar por
+captura manual una pagina de precio volatil.
+
+**Si decides re-anclar** (fuente muerta real, o el Estratega te devuelve el grano re-emitido):
+reemplaza por una **roca viva equivalente** que diga lo mismo que la `conclusion`/`txt`, descargable
+y canonica (mirrors de datasheet verificados: `cdn.eicom.ru`, `store.comet.bg`, `piekarz.pl`; verifica
+contenido con `pdftotext`+grep antes). Si la ref NO es load-bearing: **quitala** (mas honesto que
+sustituir con una URL que no fue la evidencia). Luego vuelve a Etapa 1 y confirma OK.
+
+Regla de decision: **DNS muerto load-bearing -> devolver (sospecha fabricacion); anti-bot/degradada
+load-bearing -> devolver o re-anclar a roca descargable; no load-bearing -> quitar. Nunca inventes
+la roca ni fabriques procedencia para pasar el gate.**
+
+## Via de captura local (roca canonica tras un muro anti-bot)
+
+Cuando un dato canonico SOLO vive en un host que `urllib` no cruza (st.com) y no quieres sacarlo
+del AEC, el actor LOCAL (CodeEC via Claude-in-Chrome, o el Guardian a mano) guarda la pagina/PDF
+como archivo y materializa DESDE el archivo, conservando la URL original como localizador:
+
+1. Guarda el byte canonico en una carpeta que lea el grano (p. ej. `granos/capturas/<ref>.pdf`).
+   Prefiere un documento canonico y byte-estable (datasheet PDF), no HTML de precio volatil.
+2. En la ref del grano, ademas de `url` (se conserva como localizador), agrega:
+
+       origen_local: "capturas/<ref>.pdf"   # ruta relativa a la carpeta del grano (no puede escapar)
+       captura: "manual"
+       captura_tool: "claude-in-chrome"       # o "guardian-manual"
+
+3. Materializa normal: lee el byte del archivo (no de la red), calcula el hash y sella el
+   `capture_ts` en la puerta (reloj sancionado, NUNCA el mtime). La URL queda intacta.
+4. Ingiere normal: la procedencia (`captura: manual` + herramienta) **sedimenta en el log**
+   (gate C9), para que WORM nunca presente una captura a mano como descarga `urllib`.
+
+Membrana: el default sigue siendo `urllib`; la captura es la **excepcion marcada**. La conduce el
+actor local (del mismo lado que el WORM), NO el Estratega (nube). La procedencia va al evento, nunca
+al id determinista -> no mueve identidades (E1 intacta). Detalle de diseno: `NOTA_DEV_origen_local_captura`.
 
 ## Verificar el consumo (¿ya fue ingerido?)
 

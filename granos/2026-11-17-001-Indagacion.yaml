@@ -1,0 +1,239 @@
+ek_chuah_aec:
+  meta:
+    schema_version: aec-1
+    session_id: 2026-11-17-001-Indagacion
+    consolidado_por: Guardian
+    project: ek-chuah
+  inscripciones:
+  - local_id: i1
+    premisa: 'El modulo sustituto de puerta (proyecto modulo_puerta del Taller) llevara
+      MCU en ambos modulos, sistema de 12 V. El Guardian establecio: alimentacion
+      permanente (los seguros funcionan siempre; lo demas con ignicion), entradas
+      de control por resistencia a masa (6.4 kOhm elevador, 315 Ohm seguro), un pin
+      por sentido, y el costo como parametro a ponderar, ni solo lo caro ni solo lo
+      barato. Se busca una familia de MCU automotriz de 5 V que escale de unos 20
+      a 48 pines, con ADC y bajo consumo, y un regulador de baja caida, entrada de
+      40 V o mas y corriente de reposo minima.
+
+      '
+    busqueda:
+    - Renesas RL78/F13 automotive body microcontroller 5V 20 to 48 pin AEC-Q100 datasheet
+    - Microchip AVR DD family automotive AEC-Q100 5V 14 to 32 pin AVR32DD28 VAO datasheet
+    - STM8AF6266 STM8AF6223 automotive 8-bit MCU 5V AEC-Q100 status active longevity
+    - NXP S32K116 automotive MCU 5V 32-pin 48-pin AEC-Q100 price
+    - TI MSPM0L1306-Q1 MSPM0G3507-Q1 automotive microcontroller AEC-Q100 supply voltage
+      price
+    - automotive LDO 40V low quiescent current 5V TPS7B81-Q1 TLS810B1 MCP1799 LDO40L
+      comparison
+    - Infineon TLS810B1 LDO 5V 45V 5 µA quiescent current automotive datasheet price
+      Digi-Key
+    - Microchip MCP1799 automotive LDO 45V 80 mA AEC-Q100 5V price Digi-Key MCP1799T-5002H
+    - STM8AF6266TCY Digi-Key price stock
+    - R5F10BGCLFB RL78/F13 48-LQFP Digi-Key price stock
+    - TPS7B8150QDGNRQ1 Digi-Key price stock
+    - AVR64DD32 automotive VAO AEC-Q100 Digi-Key AVR64DD32T-E/PT price
+    resultados_crudos:
+    - fuente: renesas.com (hoja de datos RL78/F13, F14; R01DS0460EJ0240)
+      texto: 'Power supply voltage: VDD = 2.7 to 5.5 V'
+    - fuente: st.com (ficha STM8AF6266)
+      texto: Qualification conforms to AEC-Q100 rev G
+    - fuente: microchip.com (ficha AVR64DD28)
+      texto: the full supply voltage range of 1.8V to 5.5V
+    - fuente: ti.com (ficha MSPM0G3507-Q1)
+      texto: 'Wide supply voltage range: 1.62V to 3.6V'
+    - fuente: ti.com (ficha TPS7B81-Q1)
+      texto: 2.7µA typical at light loads
+    - fuente: digikey.co.uk (MCP1799T-5002H/TTVAO)
+      texto: Linear Voltage Regulator IC Positive Fixed 1 Output 80mA SOT-23-3
+    - fuente: digikey.com (STM8AF6266TCY)
+      texto: STM8A STM8A Microcontroller IC 8-Bit 16MHz 32KB (32K x 8) FLASH
+    conclusion: 'Lectura del 2026-11-17, no hecho. (1) MCU: tres familias automotrices
+      de 5 V vigentes. Renesas RL78/F13 (2.7-5.5 V, 20 a 80 pines, ADC de 10 bits
+      con 4 a 31 canales) es la unica que cubre con un solo core el rango de pines
+      pedido, a precio medio. ST STM8AF (3-5.5 V, compromiso de disponibilidad hasta
+      2036) resulto la mas cara por unidad pese a ser de 8 bits. NXP S32K116 (2.7-5.5
+      V, 32 y 48 pines, ADC de 12 bits) cuesta casi lo mismo que el STM8AF y es de
+      32 bits, con 39 semanas de plazo. Microchip AVR DD automotriz es con mucho la
+      mas barata, pero la familia termina en 32 pines (26 E/S): sirve si el presupuesto
+      de E/S del modulo izquierdo baja de ~30, lo que depende del trazado. TI MSPM0-Q1
+      queda fuera si se elige 5 V: alimenta a 1.62-3.6 V. (2) Regulador: Infineon
+      TLS810B1 es el unico de la terna con existencia el dia de la captura; TI TPS7B81-Q1
+      y Microchip MCP1799 estaban agotados con 26 y 52 semanas. El MCP1799 es el mas
+      barato pero su corriente de reposo (45 uA) es un orden mayor que la de los otros
+      dos. (3) En costo, el MCU y el regulador juntos pesan menos que el puente del
+      vidrio ya elegido. Precios, existencias y plazos son volatiles (re-verificar
+      pasados 45 dias). No se obtuvo la corriente de modo STOP del RL78/F13 ni la
+      mencion AEC-Q100 en su hoja; las cifras del TLS810B1 vienen del distribuidor,
+      no de la hoja de datos.
+
+      '
+    inferidor:
+      model: estratega/claude-fable-5-2
+      ts: '2026-11-17T18:32:11'
+  necesidad:
+    pregunta: 'Que familia de microcontrolador de grado automotriz a 5 V, escalable
+      en pines y de bajo consumo, y que regulador de baja caida y minima corriente
+      de reposo convienen para un modulo de puerta de 12 V con alimentacion permanente,
+      ponderando el costo real por unidad y la existencia.
+
+      '
+    gatillo: explicito:'En tu investigacion debes tomar como un parametro a medir
+      el costo, debemos ser competitivos. No solo lo caro, no solo lo barato, da espacio
+      para ponderar numeros.' (Guardian, 2026-11-17, en respuesta al alcance propuesto
+      por el Estratega sobre la SOL de CodeTaller 'Terna de MCU y de regulador para
+      el modulo sustituto')
+    origen_nodo: null
+  consultas:
+  - formulacion: Renesas RL78/F13 automotive body microcontroller 5V 20 to 48 pin
+      AEC-Q100 datasheet
+    referencias:
+    - local_id: r1
+      url: https://www.renesas.com/en/document/dst/rl78f13-f14-datasheet
+      content_hash: a13e7969b20d08def929531cb2ae0de086a6332b73fc8b463c56e114ebdc7c83
+      capture_ts: '2026-11-18T12:46:09'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: R5F10BGCLFB RL78/F13 48-LQFP Digi-Key price stock
+    referencias:
+    - local_id: r2
+      url: https://www.digikey.es/en/products/detail/renesas-electronics-corporation/R5F10BGECLFB-15/19235760
+      content_hash: 15657c01415c8ec2b421e1c3cd8d3784965eecd750a6c5f159a8ca4a57575ba2
+      capture_ts: '2026-11-18T12:46:11'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: STM8AF6266TCY Digi-Key price stock
+    referencias:
+    - local_id: r4
+      url: https://www.digikey.com/en/products/detail/stmicroelectronics/STM8AF6266TCY/2683035
+      content_hash: 0cf3868a93fd8fccef38c7df4a98a5c73a0be8a3def898b9bd1027fd624a0eff
+      capture_ts: '2026-11-18T12:46:12'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: AVR64DD32 automotive VAO AEC-Q100 Digi-Key AVR64DD32T-E/PT price
+    referencias:
+    - local_id: r6
+      url: https://www.digikey.com/en/products/detail/microchip-technology/AVR64DD32-E-RXBVAO/26728457
+      content_hash: c14d6556cafc322df69b97f33acf010e1f1425118e62756f6dc9e2c6fcea470a
+      capture_ts: '2026-11-18T12:46:13'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: TI MSPM0L1306-Q1 MSPM0G3507-Q1 automotive microcontroller AEC-Q100
+      supply voltage price
+    referencias:
+    - local_id: r7
+      url: https://www.ti.com/product/MSPM0G3507-Q1
+      content_hash: 8a79a6d95d85b6bb4eedf58fb6e6a68d3c4ab0930108c43915e8865bd5e53e74
+      capture_ts: '2026-11-18T12:46:13'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: automotive LDO 40V low quiescent current 5V TPS7B81-Q1 TLS810B1 MCP1799
+      LDO40L comparison
+    referencias:
+    - local_id: r8
+      url: https://ti.com/product/TPS7B81-Q1
+      content_hash: 6ba39dbd034300a107aa900c05cb529b13f00c5b864ceef053dfae93290f184c
+      capture_ts: '2026-11-18T12:46:14'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: TPS7B8150QDGNRQ1 Digi-Key price stock
+    referencias:
+    - local_id: r9
+      url: https://www.digikey.com.mx/en/products/detail/texas-instruments/TPS7B8150QDGNRQ1/10445090
+      content_hash: e4e28b864716f78a70a0a13082d4432fdc51764ee483ee493713b738d600ccc1
+      capture_ts: '2026-11-18T12:46:15'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: Infineon TLS810B1 LDO 5V 45V 5 µA quiescent current automotive datasheet
+      price Digi-Key
+    referencias:
+    - local_id: r10
+      url: https://www.digikey.co.uk/en/products/detail/infineon-technologies/TLS810B1LDV50XUMA1/5845310
+      content_hash: 5a8ec6426197b81a565a2c6f3cfd3b42bc360f3852cde74e1de55b2addcc81d3
+      capture_ts: '2026-11-18T12:46:15'
+      fecha_fuente: capture
+      estatus: viva
+  - formulacion: Microchip MCP1799 automotive LDO 45V 80 mA AEC-Q100 5V price Digi-Key
+      MCP1799T-5002H
+    referencias:
+    - local_id: r11
+      url: https://www.digikey.co.uk/en/products/detail/microchip-technology/MCP1799T-5002H-TTVAO/18896524
+      content_hash: dee5252bfb0b042edb69147ee466a2a887f4ad09de6606e38cb8f9d4526680c5
+      capture_ts: '2026-11-18T12:46:36'
+      fecha_fuente: capture
+      estatus: viva
+  afirmaciones:
+  - txt: La familia RL78/F13 (Renesas, R01DS0460EJ0240 Rev. 2.40, 30-sep-2026) se
+      alimenta de 2.7 a 5.5 V, existe en 20, 30, 32, 48, 64 y 80 pines, con flash
+      de 16 a 128 KB, ADC de 10 bits de 4 a 31 canales y grados de temperatura hasta
+      105, 125 y 150 C.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r1
+    inferida_por: i1
+  - txt: El 2026-11-17 el R5F10BGECLFB#15 (RL78/F13, 48-LQFP, 64 KB, 38 E/S, hasta
+      105 C) costaba 3.96 EUR por unidad (2.48 a 100 piezas) en Digi-Key, con 1,559
+      piezas en existencia y 18 semanas de plazo de fabrica.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r2
+    inferida_por: i1
+  - txt: El 2026-11-17 el STM8AF6266TCY (32-LQFP, 25 E/S) costaba 4.53 USD por unidad
+      (2.83 a 100 piezas) en Digi-Key, con 8,732 piezas en existencia y 16 semanas
+      de plazo de fabrica.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r4
+    inferida_por: i1
+  - txt: El 2026-11-17 el AVR64DD32-E/RXBVAO (Microchip, VQFN de 32 pines, 1.8 a 5.5
+      V, 26 E/S, AEC-Q100) costaba 1.53 USD por unidad (1.27 a 100 piezas) en Digi-Key,
+      con 980 piezas en existencia y 7 semanas de plazo; la familia AVR DD llega solo
+      hasta 32 pines.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r6
+    inferida_por: i1
+  - txt: 'El MSPM0G3507-Q1 (TI, AEC-Q100 grado 1, 28 a 64 pines) se alimenta de 1.62
+      a 3.6 V: no admite alimentacion de 5 V, solo entradas tolerantes a 5 V.'
+    tipo: claim
+    estatus: afirmado
+    survived_from: r7
+    inferida_por: i1
+  - txt: El TPS7B81-Q1 (TI, hoja Rev. F del 25-sep-2025) acepta de 3 a 40 V con transitorio
+      de 45 V, entrega 150 mA en salida fija de 5, 3.3 o 2.5 V, con 2.7 uA tipicos
+      de corriente de reposo y 540 mV maximos de caida a 150 mA en la version de 5
+      V; calificado AEC-Q100.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r8
+    inferida_por: i1
+  - txt: El 2026-11-17 el TPS7B8150QDGNRQ1 costaba 2.04 USD por unidad (1.22 a 100
+      piezas) en Digi-Key Mexico, con cero existencia, 26 semanas de plazo y reposicion
+      esperada el 2027-01-13.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r9
+    inferida_por: i1
+  - txt: El 2026-11-17 el TLS810B1LDV50XUMA1 (Infineon, 5 V, 100 mA, 42 V de entrada
+      maxima y 0.55 V de caida a 100 mA segun el distribuidor) costaba 1.13 GBP por
+      unidad (0.66 a 100 piezas) en Digi-Key, con 10,789 piezas en existencia y 30
+      semanas de plazo de fabrica.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r10
+    inferida_por: i1
+  - txt: El 2026-11-17 el MCP1799T-5002H/TTVAO (Microchip, 5 V, 80 mA, 45 V de entrada
+      maxima, 45 uA de corriente de reposo, SOT-23, AEC-Q100) costaba 0.40 GBP por
+      unidad (0.31 a 100 piezas) en Digi-Key, con cero existencia y 52 semanas de
+      plazo de fabrica.
+    tipo: claim
+    estatus: afirmado
+    survived_from: r11
+    inferida_por: i1
+  - txt: 'Lectura del Estratega: el STM8AF, de 8 bits, cuesta por unidad mas que el
+      RL78/F13 de 16 bits y casi lo mismo que el S32K116 de 32 bits; el precio no
+      sigue a la capacidad, y la eleccion por costo depende de cuantas E/S exija el
+      modulo izquierdo.'
+    tipo: claim
+    estatus: afirmado
+    survived_from: r4
+    inferida_por: i1

@@ -142,6 +142,48 @@ class MaterializaOrden(unittest.TestCase):
             self.assertIsNotNone(asc["version"])
         cx.close()
 
+    # ---- via de captura local: el byte sale de un ARCHIVO, no de la red; url se conserva ----
+    def test_captura_local_desde_archivo(self):
+        doc = _orden()
+        capt_dir = os.path.join(self.tmp, "capturas")
+        os.makedirs(capt_dir, exist_ok=True)
+        bytes_locales = b"<html>captura manual del datasheet tras el muro anti-bot (st.com)</html>"
+        with open(os.path.join(capt_dir, "r3.html"), "wb") as f:
+            f.write(bytes_locales)
+        # r3 (st.com, anti-bot) pasa a captura local, conservando su URL como localizador.
+        r3 = doc["ek_chuah_aec"]["consultas"][1]["referencias"][0]
+        self.assertEqual(r3["local_id"], "r3")
+        url_original = "https://www.st.com/en/microcontrollers-microprocessors/stm8af6266.html"
+        r3["url"] = url_original
+        r3["origen_local"] = "capturas/r3.html"          # relativo a base_dir (carpeta del grano)
+        r3["captura_tool"] = "claude-in-chrome"
+
+        def fetch_prohibe_red_para_r3(url):
+            if url == url_original:
+                raise AssertionError("una ref con origen_local NO debe tocar la red")
+            return PAGINAS[url]
+
+        res = materializar_orden(doc, self.store, fetch=fetch_prohibe_red_para_r3,
+                                 clock=self.clock, base_dir=self.tmp)
+        self.assertEqual(len(res["materializadas"]), 3)
+        self.assertEqual(r3["content_hash"], content_hash(bytes_locales), "hash != bytes del archivo")
+        self.assertEqual(r3["url"], url_original, "la via de captura local debe conservar la URL")
+        self.assertEqual(r3["captura"], "manual")
+        self.assertEqual(r3["captura_tool"], "claude-in-chrome")
+        self.assertEqual(r3["capture_ts"], "2026-06-27T10:15:00", "reloj sancionado en la puerta, no mtime")
+        self.assertTrue(self.store.has_snapshot(r3["content_hash"]))
+
+    # ---- guard: un origen_local relativo NO puede escapar de la carpeta del grano ----
+    def test_captura_local_guard_anti_escape(self):
+        doc = _orden()
+        r3 = doc["ek_chuah_aec"]["consultas"][1]["referencias"][0]
+        r3["origen_local"] = "../fuera_del_grano.html"   # intenta salir de base_dir
+        r3["captura_tool"] = "x"
+        res = materializar_orden(doc, self.store, fetch=_fake_fetch, clock=self.clock,
+                                 base_dir=os.path.join(self.tmp, "sub"))
+        fallidas = {f["local_id"] for f in res["fallidas"]}
+        self.assertIn("r3", fallidas, "origen_local con '..' debe caer por el guard, no materializar")
+
     # ---- desde archivo: materializa IN-PLACE (un grano = un archivo) -> ingestible ----
     def test_materializar_archivo_in_place(self):
         import yaml

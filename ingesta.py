@@ -128,6 +128,19 @@ def lint(doc, store=None) -> list:
             rlid = r.get("local_id")
             if rlid:
                 ref_ids.add(rlid)
+            # C9 (procedencia): una roca capturada a mano (via de captura local, origen_local)
+            # DEBE declararse 'manual' + la herramienta, para que el log no presente una captura
+            # manual como descarga automatica (D2: WORM no miente sobre como llego el byte).
+            # Estructural -> corre en ambas fases (no necesita WORM).
+            captura = r.get("captura")
+            if r.get("origen_local") and captura != "manual":
+                errs.append(f"C9: referencia[{rlid}] con origen_local debe declarar captura: manual "
+                            f"(no puede presentarse como descarga automatica)")
+            if captura == "manual" and not str(r.get("captura_tool") or "").strip():
+                errs.append(f"C9: referencia[{rlid}] captura: manual sin captura_tool "
+                            f"(una captura manual debe decir con que se hizo)")
+            if captura is not None and captura not in ("manual", "automatica"):
+                errs.append(f"C9: referencia[{rlid}] captura {captura!r} invalida (manual|automatica)")
             if store is None:
                 # Fase EMISION: el plano fisico aun no existe. C3/C5 (roca en WORM, reloj
                 # sancionado) se difieren a la ingesta post-materializacion, PERO el
@@ -254,9 +267,16 @@ def derivar_eventos(doc, session_id: str = None) -> list:
             h = _norm_hash(r.get("content_hash"))
             cap = r.get("capture_ts")
             vid = _det_id("ref", ref, h, cap)
+            # Procedencia de los bytes (como se obtuvo la roca) -> va al EVENTO para que
+            # SEDIMENTE en el log: WORM nunca debe afirmar una descarga urllib que no ocurrio
+            # (via de captura local, NOTA_DEV origen_local). NUNCA entra al vid: el id de una
+            # ref normal no cambia (E1 intacta). Default 'automatica'; 'manual' solo si se
+            # capturo por archivo (origen_local).
             eventos.append((vid, {"ev": "referencia", "referente_id": ref, "content_hash": h,
                                   "url_cruda": url, "capture_ts": cap,
-                                  "fecha_fuente": r.get("fecha_fuente", "capture"), "q_id": q_id}))
+                                  "fecha_fuente": r.get("fecha_fuente", "capture"), "q_id": q_id,
+                                  "captura": r.get("captura", "automatica"),
+                                  "captura_tool": r.get("captura_tool", "")}))
             ref_gid[r.get("local_id")] = vid
 
     # afirmaciones (I3: ancladas a referencia + inscripcion)
